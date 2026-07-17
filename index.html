@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yönlendiriliyorsunuz...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="loader"></div>
+
+    <script>
+        // 1. ESNAF LİSTESİ: Yeni esnaflar geldikçe burayı güncelleyeceksin kanka.
+        const dukkanlar = {
+            "01": "https://google.com", // 1. Kart (Şimdilik test için Google'a gitsin)
+            "02": "https://google.com", // 2. Kart
+            "03": "https://google.com", // 3. Kart
+            "04": "https://google.com",
+            "05": "https://google.com",
+            "06": "https://google.com",
+            "07": "https://google.com",
+            "08": "https://google.com",
+            "09": "https://google.com",
+            "10": "https://google.com",
+            "11": "https://google.com",
+            "12": "https://google.com",
+            "13": "https://google.com",
+            "14": "https://google.com",
+            "15": "https://google.com",
+            "16": "https://google.com",
+            "17": "https://google.com",
+            "18": "https://google.com",
+            "19": "https://google.com",
+            "20": "https://google.com"  // 20. Kart
+        };
+
+        // 2. Linkin sonundaki ID'yi okuma (Örn: ?id=01)
+        const urlParams = new URLSearchParams(window.location.search);
+        const kartId = urlParams.get('id');
+
+        // 3. Yönlendirme mantığı
+        if (kartId && dukkanlar[kartId]) {
+            window.location.href = dukkanlar[kartId];
+        } else {
+            // ID geçersizse hata vermesin, senin ana profiline gitsin
+            window.location.href = "https://github.com/mehmetcsr"; 
+        }
+    </script>
+</body>
+</html>
