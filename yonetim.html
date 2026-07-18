@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puanla! - Dükkan Link Yönetim Paneli</title>
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: #ffffff;
+            max-width: 500px;
+            width: 100%;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+        .logo {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 25px;
+            color: #1e293b;
+        }
+        .logo span { color: #4285f4; }
+        .form-grup {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #475569;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            box-sizing: border-box;
+            transition: all 0.3s;
+        }
+        input:focus {
+            border-color: #4285f4;
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #3174dc; }
+        .durum {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            display: none;
+        }
+        .basari { background-color: #dcfce7; color: #15803d; }
+        .hata { background-color: #fee2e2; color: #b91c1c; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="logo"><span>Puanla!</span> Link Yönetimi</div>
+    
+    <!-- Güvenlik için token alanını buraya koyduk, tarayıcıda bir kez girmen yeterli -->
+    <div class="form-grup">
+        <label>GitHub Erişim Token (ghp_...)</label>
+        <input type="password" id="githubToken" placeholder="GitHub'dan aldığın tokenı yapıştır">
+    </div>
+
+    <div class="form-grup">
+        <label>Kart ID (Örn: 01, 02, 10)</label>
+        <input type="text" id="kartID" placeholder="01">
+    </div>
+
+    <div class="form-grup">
+        <label>Yeni Google Haritalar Yorum Linki</label>
+        <input type="text" id="dukkanLinki" placeholder="https://search.google.com/local/writereview?...">
+    </div>
+
+    <button onclick="githubKoduGuncelle()">Sistemi Güncelle ve Kaydet</button>
+
+    <div id="durumKutusu" class="durum"></div>
+</div>
+
+<script>
+    // Tarayıcı hafızasından tokenı otomatik yükle (kolaylık olsun diye)
+    if(localStorage.getItem('gh_token')) {
+        document.getElementById('githubToken').value = localStorage.getItem('gh_token');
+    }
+
+    async function githubKoduGuncelle() {
+        const token = document.getElementById('githubToken').value;
+        const id = document.getElementById('kartID').value.trim();
+        const yeniLink = document.getElementById('dukkanLinki').value.trim();
+        const durumKutusu = document.getElementById('durumKutusu');
+
+        if(!token || !id || !yeniLink) {
+            durumGoster("Lütfen tüm alanları doldurun!", "hata");
+            return;
+        }
+
+        // Tokenı hafızaya kaydet, sonraki girişlerde bir daha yazma
+        localStorage.setItem('gh_token', token);
+        durumGoster("GitHub ile bağlantı kuruluyor, lütfen bekleyin...", "basari");
+
+        // BURAYI KENDİ BİLGİLERİNE GÖRE DOLDUR KANKA
+        const USERNAME = "mehmetcsr"; 
+        const REPO = "puanla";
+        const FILE_PATH = "index.html"; 
+
+        const url = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/${FILE_PATH}`;
+
+        try {
+            // 1. Mevcut index.html kodunu ve SHA değerini çekiyoruz
+            const response = await fetch(url, {
+                headers: { "Authorization": `token ${token}` }
+            });
+            const data = await response.get();
+            const sha = data.sha;
+            // Base64 kodlanmış içeriği düz metne çeviriyoruz
+            let b64Cozulen = decodeURIComponent(atob(data.content).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            // 2. Kodun içindeki dukkanLinkleri nesnesini bulup yeni linki ekliyoruz
+            const baslangicIndex = b64Cozulen.indexOf("const dukkanLinkleri = {");
+            const bitisIndex = b64Cozulen.indexOf("};", baslangicIndex);
+
+            if(baslangicIndex === -1 || bitisIndex === -1) {
+                durumGoster("index.html dosyasında dukkanLinkleri alanı bulunamadı!", "hata");
+                return;
+            }
+
+            let linklerBlogu = b64Cozulen.substring(baslangicIndex, bitisIndex + 2);
+            
+            // Eğer bu ID zaten varsa eskisini temizlemek için regex veya basit replace mantığı kuruyoruz
+            let aramaRegex = new RegExp(`"${id}":\\s*".*?"`, "g");
+            let yeniSatir = `"${id}": "${yeniLink}"`;
+
+            let yeniLinklerBlogu;
+            if (linklerBlogu.match(aramaRegex)) {
+                // Varsa güncelle
+                yeniLinklerBlogu = linklerBlogu.replace(aramaRegex, yeniSatir);
+            } else {
+                // Yoksa listenin sonuna yeni eleman olarak ekle
+                yeniLinklerBlogu = linklerBlogu.replace("}", `,    "${id}": "${yeniLink}"\n        }`);
+            }
+
+            // Güncel kodu ana metne gömüyoruz
+            let yeniKodlar = b64Cozulen.replace(linklerBlogu, yeniLinklerBlogu);
+
+            // 3. Hazırlanan yeni kodu Base64 formatına çevirip GitHub'a geri basıyoruz (Commit)
+            const guncellemeResponse = await fetch(url, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `token ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: `Kart ${id} linki panelden güncellendi`,
+                    content: btoa(unescape(encodeURIComponent(yeniKodlar))),
+                    sha: sha
+                })
+            });
+
+            if(guncellemeResponse.ok) {
+                durumGoster(`Başarılı! Kart ${id} artık yeni dükkana yönleniyor.`, "basari");
+                document.getElementById('kartID').value = "";
+                document.getElementById('dukkanLinki').value = "";
+            } else {
+                durumGoster("GitHub güncelleme hatası yaptı. Tokenı kontrol edin.", "hata");
+            }
+
+        } catch (error) {
+            console.error(error);
+            durumGoster("Bağlantı hatası oluştu!", "hata");
+        }
+    }
+
+    function durumGoster(metin, tip) {
+        const durumKutusu = document.getElementById('durumKutusu');
+        durumKutusu.innerText = metin;
+        durumKutusu.className = `durum ${tip}`;
+        durumKutusu.style.display = "block";
+    }
+</script>
+
+</body>
+</html>
