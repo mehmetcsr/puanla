@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="tr">
-<head> 
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Yorum Yönlendirme Sistemi</title>
+    <title>Google Yorum Yonlendirme Sistemi</title>
     <style>
         /* Şık ve Profesyonel Yükleniyor Ekranı Tasarımı */
         body {
@@ -56,7 +56,7 @@
         <div class="logo">
             <span class="g-mavi">G</span><span class="g-kirmizi">o</span><span class="g-sari">o</span><span class="g-mavi">g</span><span class="g-yesil">l</span><span class="g-kirmizi">e</span>
         </div>
-        <div class="metin">Yorum Sayfasına Yönlendiriliyorsunuz...</div>
+        <div class="metin">Yorum Sayfasina Yonlendiriliyorsunuz...</div>
     </div>
 
     <script>
@@ -64,12 +64,11 @@
         // 🎯 PANELİNDEN YAPTIĞIN GÜNCELLEMELER OTOMATİK OLARAK BU LİSTEYE YAZILACAK!
         // =========================================================================
         const dukkanLinkleri = {
-            "01": "https://search.google.com/local/writereview?placeid=ChIJ...",
-            "02": "https://search.google.com/local/writereview?placeid=ChIJ..."
+            "01": "https://search.google.com/local/writereview?placeid=ChIJ",
+            "02": "https://search.google.com/local/writereview?placeid=ChIJ"
         };
         // =========================================================================
 
-        // Otomatik Akıllı Yönlendirici Fonksiyon
         function yonlendir() {
             // Tarayıcı adres çubuğundaki ?id=XX parametresini yakalar
             const urlParametreleri = new URLSearchParams(window.location.search);
@@ -77,11 +76,10 @@
 
             // Eğer ID adreste varsa ve yukarıdaki listemizde tanımlıysa
             if (kartID && dukkanLinkleri[kartID]) {
-                // Müşteriyi doğrudan o dükkanın Google linkine uçurur
                 window.location.href = dukkanLinkleri[kartID];
             } else {
                 // Eğer ID bulunamazsa veya yanlışsa hata mesajı gösterir
-                document.querySelector('.metin').innerText = "Geçersiz veya Eksik Kart Numarası!";
+                document.querySelector('.metin').innerText = "Gecersiz veya Eksik Kart Numarasi!";
                 document.querySelector('.spinner').style.display = 'none';
             }
         }
