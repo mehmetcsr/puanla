@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mehmetcsr QR Kod Üretici Panel</title>
+    <title>Mehmetcsr QR Kod Üretici & İndirici Panel</title>
     <!-- QR Kod Oluşturma Kütüphanesi -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
@@ -47,7 +47,7 @@
         input:focus {
             border-color: #007bff;
         }
-        button {
+        .btn-create {
             width: 100%;
             background-color: #007bff;
             color: white;
@@ -58,9 +58,30 @@
             cursor: pointer;
             font-weight: bold;
             transition: background 0.2s;
+            margin-bottom: 10px;
         }
-        button:hover {
+        .btn-create:hover {
             background-color: #0056b3;
+        }
+        .btn-download {
+            width: 100%;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+            display: none; /* İlk başta gizli, QR üretilince açılacak */
+            text-decoration: none;
+            display: inline-block;
+            box-sizing: border-box;
+            margin-top: 15px;
+        }
+        .btn-download:hover {
+            background-color: #218838;
         }
         #qrcode {
             margin-top: 25px;
@@ -79,7 +100,7 @@
             padding: 10px;
             border-radius: 6px;
             font-size: 13px;
-            margin-top: 15px;
+            margin-top: 20px;
             text-align: left;
         }
     </style>
@@ -87,24 +108,27 @@
 <body>
 
 <div class="container">
-    <h2>QR Kod Üretici Panel v1.0</h2>
-    <p>Sınırsız, reklamsız ve ömür boyu ücretsiz QR oluşturucu.</p>
+    <h2>QR Kod Üretici & İndirici</h2>
+    <p>Sınırsız, reklamsız ve bilgisayara doğrudan indirme özellikli panel.</p>
     
     <input type="text" id="urlInput" placeholder="ID Girin (Örn: 01)" value="01">
-    <button onclick="generateQR()">QR Kod Oluştur</button>
-
+    <button class="btn-create" onclick="generateQR()">QR Kod Oluştur</button>
+    
     <div id="qrcode"></div>
     
+    <!-- İndirme Butonu -->
+    <a id="downloadBtn" class="btn-download" href="#" download="qr01.png">Görseli Bilgisayara İndir (qr01.png)</a>
+
     <div class="info-box">
-        <strong>Tüyo:</strong> Sadece ID numarasını (01, 02 vb.) yazıp butona basman yeterlidir. Sistem linki otomatik tamamlar.
+        <strong>Nasıl Kullanılır?</strong> ID kısmına kart numarasını yazıp "Oluştur" deyin. Ardından yeşil butona basarak doğrudan baskıya hazır PNG dosyasını indirin.
     </div>
 </div>
 
 <script>
-    // QR kod nesnesini global olarak tanımlıyoruz
+    // QR kod nesnesini yüksek çözünürlük için 500x500 yapıyoruz (Baskıda çamur gibi durmasın diye)
     var qrcode = new QRCode(document.getElementById("qrcode"), {
-        width: 256,
-        height: 256,
+        width: 500,
+        height: 500,
         colorDark : "#000000",
         colorLight : "#ffffff",
         correctLevel : QRCode.CorrectLevel.H
@@ -117,15 +141,28 @@
             return;
         }
         
-        // Senin ana yönlendirme link yapın (Parantezsiz, tertemiz)
+        // Link yapısı
         var tamLink = "https://mehmetcsr.github.io/puanla/?id=" + idVal;
         
-        // QR kodu güncelliyoruz
+        // QR Kodu yenile
         qrcode.clear();
         qrcode.makeCode(tamLink);
+        
+        // QR kod görselinin arka planda oluşması için 200 milisaniye süre tanıyoruz
+        setTimeout(function() {
+            var qrImg = document.querySelector("#qrcode img");
+            if(qrImg) {
+                var downloadBtn = document.getElementById("downloadBtn");
+                // İndirme butonunun linkini ve dosya adını güncelliyoruz
+                downloadBtn.href = qrImg.src;
+                downloadBtn.download = "qr" + idVal + ".png";
+                downloadBtn.innerText = "Görseli Bilgisayara İndir (qr" + idVal + ".png)";
+                downloadBtn.style.display = "block";
+            }
+        }, 200);
     }
 
-    // Sayfa ilk açıldığında otomatik olarak 01 için bir tane üretsin
+    // Sayfa ilk açıldığında otomatik 01'i hazır etsin
     generateQR();
 </script>
 
