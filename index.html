@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Tarayıcılara bu sayfayı kesinlikle hafızaya alma diyoruz -->
+    <!-- Meta etiketleri ile tarayıcıya bu sayfayı asla hafızaya alma diyoruz -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -77,15 +77,9 @@
             const kartID = urlParametreleri.get('id');
 
             if (kartID && dukkanLinkleri[kartID]) {
-                let hedefLink = dukkanLinkleri[kartID];
-
-                // 🎯 İŞTE SİHİRLİ DOKUNUŞ: Linkin sonuna benzersiz bir zaman damgası ekliyoruz.
-                // Google linkini bozmamak için linkte zaten '?' işareti var mı diye bakıyoruz.
-                const baglac = hedefLink.includes('?') ? '&' : '?';
-                
-                // Linkin sonuna &cache_bypass=17182938129 gibi her saniye değişen bir sayı ekler.
-                // Böylece telefonun tarayıcısı her defasında sıfırdan canlı adrese gitmeye zorlanır!
-                window.location.href = hedefLink + baglac + "cache_bypass=" + new Date().getTime();
+                // 🎯 Orijinal temiz linki hiç bozmadan direkt yönlendiriyoruz kanka.
+                // Önbelleği yukarıdaki <meta> etiketleri zaten hallediyor.
+                window.location.href = dukkanLinkleri[kartID];
             } else {
                 document.querySelector('.metin').innerText = "Gecersiz veya Eksik Kart Numarasi!";
                 document.querySelector('.spinner').style.display = 'none';
