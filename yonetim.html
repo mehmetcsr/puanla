@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
-<head> 
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Puanla! - Dükkan Link Yönetim Paneli</title>
@@ -84,7 +84,6 @@
 <div class="container">
     <div class="logo"><span>Puanla!</span> Link Yönetimi</div>
     
-    <!-- Güvenlik için token alanını buraya koyduk, tarayıcıda bir kez girmen yeterli -->
     <div class="form-grup">
         <label>GitHub Erişim Token (ghp_...)</label>
         <input type="password" id="githubToken" placeholder="GitHub'dan aldığın tokenı yapıştır">
@@ -106,13 +105,13 @@
 </div>
 
 <script>
-    // Tarayıcı hafızasından tokenı otomatik yükle (kolaylık olsun diye)
     if(localStorage.getItem('gh_token')) {
         document.getElementById('githubToken').value = localStorage.getItem('gh_token');
     }
 
     async function githubKoduGuncelle() {
-        const token = document.getElementById('githubToken').value;
+        // Eğer token alanını yanlış kaydettiysek diye kutuyu garantiye alalım
+        const token = document.getElementById('githubToken').value.trim();
         const id = document.getElementById('kartID').value.trim();
         const yeniLink = document.getElementById('dukkanLinki').value.trim();
         const durumKutusu = document.getElementById('durumKutusu');
@@ -122,11 +121,9 @@
             return;
         }
 
-        // Tokenı hafızaya kaydet, sonraki girişlerde bir daha yazma
         localStorage.setItem('gh_token', token);
         durumGoster("GitHub ile bağlantı kuruluyor, lütfen bekleyin...", "basari");
 
-        // BURAYI KENDİ BİLGİLERİNE GÖRE DOLDUR KANKA
         const USERNAME = "mehmetcsr"; 
         const REPO = "puanla";
         const FILE_PATH = "index.html"; 
@@ -134,18 +131,24 @@
         const url = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/${FILE_PATH}`;
 
         try {
-            // 1. Mevcut index.html kodunu ve SHA değerini çekiyoruz
             const response = await fetch(url, {
                 headers: { "Authorization": `token ${token}` }
             });
-            const data = await response.get();
+            
+            // İŞTE BENİM HATALI YAZDIĞIM SATIR BURASIYDI KANKA, DÜZELTTİM:
+            const data = await response.json(); 
+            
+            if(data.message === "Not Found" || data.message === "Bad credentials") {
+                durumGoster("Hata: Token yanlış veya yetkisi yok (repo tikli olmalı)!", "hata");
+                return;
+            }
+
             const sha = data.sha;
-            // Base64 kodlanmış içeriği düz metne çeviriyoruz
+            
             let b64Cozulen = decodeURIComponent(atob(data.content).split('').map(function(c) {
                 return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
             }).join(''));
 
-            // 2. Kodun içindeki dukkanLinkleri nesnesini bulup yeni linki ekliyoruz
             const baslangicIndex = b64Cozulen.indexOf("const dukkanLinkleri = {");
             const bitisIndex = b64Cozulen.indexOf("};", baslangicIndex);
 
@@ -156,23 +159,18 @@
 
             let linklerBlogu = b64Cozulen.substring(baslangicIndex, bitisIndex + 2);
             
-            // Eğer bu ID zaten varsa eskisini temizlemek için regex veya basit replace mantığı kuruyoruz
             let aramaRegex = new RegExp(`"${id}":\\s*".*?"`, "g");
             let yeniSatir = `"${id}": "${yeniLink}"`;
 
             let yeniLinklerBlogu;
             if (linklerBlogu.match(aramaRegex)) {
-                // Varsa güncelle
                 yeniLinklerBlogu = linklerBlogu.replace(aramaRegex, yeniSatir);
             } else {
-                // Yoksa listenin sonuna yeni eleman olarak ekle
                 yeniLinklerBlogu = linklerBlogu.replace("}", `,    "${id}": "${yeniLink}"\n        }`);
             }
 
-            // Güncel kodu ana metne gömüyoruz
             let yeniKodlar = b64Cozulen.replace(linklerBlogu, yeniLinklerBlogu);
 
-            // 3. Hazırlanan yeni kodu Base64 formatına çevirip GitHub'a geri basıyoruz (Commit)
             const guncellemeResponse = await fetch(url, {
                 method: "PUT",
                 headers: {
@@ -180,7 +178,7 @@
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    message: `Kart ${id} linki panelden güncellendi`,
+                    message: `Kart ${id} linki panelden guncellendi`,
                     content: btoa(unescape(encodeURIComponent(yeniKodlar))),
                     sha: sha
                 })
@@ -191,12 +189,12 @@
                 document.getElementById('kartID').value = "";
                 document.getElementById('dukkanLinki').value = "";
             } else {
-                durumGoster("GitHub güncelleme hatası yaptı. Tokenı kontrol edin.", "hata");
+                durumGoster("GitHub güncelleme hatası yaptı. Token yetkilerini kontrol edin.", "hata");
             }
 
         } catch (error) {
             console.error(error);
-            durumGoster("Bağlantı hatası oluştu!", "hata");
+            durumGoster("Bağlantı hatası oluştu! Konsolu kontrol edin.", "hata");
         }
     }
 
