@@ -110,7 +110,6 @@
     }
 
     async function githubKoduGuncelle() {
-        // Eğer token alanını yanlış kaydettiysek diye kutuyu garantiye alalım
         const token = document.getElementById('githubToken').value.trim();
         const id = document.getElementById('kartID').value.trim();
         const yeniLink = document.getElementById('dukkanLinki').value.trim();
@@ -128,18 +127,21 @@
         const REPO = "puanla";
         const FILE_PATH = "index.html"; 
 
-        const url = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/${FILE_PATH}`;
+        // 🎯 YÖNETİM PANELİ CACHE KIRICI: API isteğinin sonuna zaman damgası ekleyerek sunucudan en güncel SHA ve dosya içeriğini zorla alıyoruz.
+        const url = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/${FILE_PATH}?t=` + new Date().getTime();
 
         try {
             const response = await fetch(url, {
-                headers: { "Authorization": `token ${token}` }
+                headers: { 
+                    "Authorization": `token ${token}`,
+                    "If-None-Match": "" // Sunucunun eski önbelleği göndermesini engeller
+                }
             });
             
-            // İŞTE BENİM HATALI YAZDIĞIM SATIR BURASIYDI KANKA, DÜZELTTİM:
             const data = await response.json(); 
             
             if(data.message === "Not Found" || data.message === "Bad credentials") {
-                durumGoster("Hata: Token yanlış veya yetkisi yok (repo tikli olmalı)!", "hata");
+                durumGoster("Hata: Token yanlış veya yetkisi yok!", "hata");
                 return;
             }
 
@@ -171,6 +173,7 @@
 
             let yeniKodlar = b64Cozulen.replace(linklerBlogu, yeniLinklerBlogu);
 
+            // Temizleme işlemi: Gönderdiğimiz PUT isteğine de t parametresi ekliyoruz
             const guncellemeResponse = await fetch(url, {
                 method: "PUT",
                 headers: {
@@ -185,7 +188,7 @@
             });
 
             if(guncellemeResponse.ok) {
-                durumGoster(`Başarılı! Kart ${id} artık yeni dükkana yönleniyor.`, "basari");
+                durumGoster(`Başarılı! Kart ${id} artık yeni dükkana yönleniyor. (Canlıya geçmesi 1-2 dk sürebilir)`, "basari");
                 document.getElementById('kartID').value = "";
                 document.getElementById('dukkanLinki').value = "";
             } else {
