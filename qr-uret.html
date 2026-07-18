@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mehmetcsr QR Kod Üretici Panel</title>
+    <!-- QR Kod Oluşturma Kütüphanesi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+            outline: none;
+        }
+        input:focus {
+            border-color: #007bff;
+        }
+        button {
+            width: 100%;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #qrcode {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+        }
+        #qrcode img {
+            border: 4px solid #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            padding: 10px;
+            background: #fff;
+        }
+        .info-box {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-top: 15px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>QR Kod Üretici Panel v1.0</h2>
+    <p>Sınırsız, reklamsız ve ömür boyu ücretsiz QR oluşturucu.</p>
+    
+    <input type="text" id="urlInput" placeholder="ID Girin (Örn: 01)" value="01">
+    <button onclick="generateQR()">QR Kod Oluştur</button>
+
+    <div id="qrcode"></div>
+    
+    <div class="info-box">
+        <strong>Tüyo:</strong> Sadece ID numarasını (01, 02 vb.) yazıp butona basman yeterlidir. Sistem linki otomatik tamamlar.
+    </div>
+</div>
+
+<script>
+    // QR kod nesnesini global olarak tanımlıyoruz
+    var qrcode = new QRCode(document.getElementById("qrcode"), {
+        width: 256,
+        height: 256,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+    });
+
+    function generateQR() {
+        var idVal = document.getElementById("urlInput").value.trim();
+        if(idVal === "") {
+            alert("Lütfen bir ID girin!");
+            return;
+        }
+        
+        // Senin ana yönlendirme link yapın (Parantezsiz, tertemiz)
+        var tamLink = "https://mehmetcsr.github.io/puanla/?id=" + idVal;
+        
+        // QR kodu güncelliyoruz
+        qrcode.clear();
+        qrcode.makeCode(tamLink);
+    }
+
+    // Sayfa ilk açıldığında otomatik olarak 01 için bir tane üretsin
+    generateQR();
+</script>
+
+</body>
+</html>
