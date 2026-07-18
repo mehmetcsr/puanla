@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Tarayıcılara bu sayfayı kesinlikle hafızaya alma diyoruz -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Google Yorum Yonlendirme Sistemi</title>
     <style>
-        /* Şık ve Profesyonel Yükleniyor Ekranı Tasarımı */
         body {
             background-color: #ffffff;
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -65,27 +68,30 @@
         // =========================================================================
         const dukkanLinkleri = {
             "01": "https://search.google.com/local/writereview?placeid=ChIJ",
-            "02": "https://www.google.com/search?q=kebab%C3%A7%C4%B1&rlz=1C1GCEA_enTR1027TR1027&oq=kebab%C3%A7%C4%B1&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIOCAEQABgKGAsYsQMYgAQyCwgCEAAYChgLGIAEMhEIAxAuGAoYCxivARjHARiABDIRCAQQLhgKGAsYrwEYxwEYgAQyCwgFEAAYChgLGIAEMhEIBhAuGAoYCxivARjHARiABDIRCAcQLhgKGAsYrwEYxwEYgAQyEQgIEC4YChgLGK8BGMcBGIAEMgsICRAAGAoYCxiABNIBCDEyMzFqMGo3qAIIsAIB8QV-8hueR_FZ7A&sourceid=chrome&source=chrome.ob&ie=UTF-8"
-        ,    "03": "https://www.youtube.com/watch?v=Steiu8j4ZB0&list=PLxSXQclq3muAz7yXMLSTWkrgOJdL-X3IK"
+            "02": "https://search.google.com/local/writereview?placeid=ChIJ"
         };
         // =========================================================================
 
         function yonlendir() {
-            // Tarayıcı adres çubuğundaki ?id=XX parametresini yakalar
             const urlParametreleri = new URLSearchParams(window.location.search);
             const kartID = urlParametreleri.get('id');
 
-            // Eğer ID adreste varsa ve yukarıdaki listemizde tanımlıysa
             if (kartID && dukkanLinkleri[kartID]) {
-                window.location.href = dukkanLinkleri[kartID];
+                let hedefLink = dukkanLinkleri[kartID];
+
+                // 🎯 İŞTE SİHİRLİ DOKUNUŞ: Linkin sonuna benzersiz bir zaman damgası ekliyoruz.
+                // Google linkini bozmamak için linkte zaten '?' işareti var mı diye bakıyoruz.
+                const baglac = hedefLink.includes('?') ? '&' : '?';
+                
+                // Linkin sonuna &cache_bypass=17182938129 gibi her saniye değişen bir sayı ekler.
+                // Böylece telefonun tarayıcısı her defasında sıfırdan canlı adrese gitmeye zorlanır!
+                window.location.href = hedefLink + baglac + "cache_bypass=" + new Date().getTime();
             } else {
-                // Eğer ID bulunamazsa veya yanlışsa hata mesajı gösterir
                 document.querySelector('.metin').innerText = "Gecersiz veya Eksik Kart Numarasi!";
                 document.querySelector('.spinner').style.display = 'none';
             }
         }
 
-        // Sayfa açılır açılmaz yönlendirmeyi başlat
         window.onload = yonlendir;
     </script>
 
