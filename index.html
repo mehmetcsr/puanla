@@ -3,71 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yönlendiriliyorsunuz...</title>
+    <title>Google Yorum Yönlendirme Sistemi</title>
     <style>
+        /* Şık ve Profesyonel Yükleniyor Ekranı Tasarımı */
         body {
-            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            font-family: 'Segoe UI', Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f4f4f9;
         }
-        .loader {
-            border: 8px solid #f3f3f3;
-            border-top: 8px solid #3498db;
+        .yukleniyor-kutu {
+            text-align: center;
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 20px;
+        }
+        .g-mavi { color: #4285f4; }
+        .g-kirmizi { color: #ea4335; }
+        .g-sari { color: #fabc05; }
+        .g-yesil { color: #34a853; }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4285f4;
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
             animation: spin 1s linear infinite;
+            margin: 0 auto 15px auto;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .metin {
+            color: #475569;
+            font-size: 16px;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
 
-    <div class="loader"></div>
+    <div class="yukleniyor-kutu">
+        <div class="spinner"></div>
+        <div class="logo">
+            <span class="g-mavi">G</span><span class="g-kirmizi">o</span><span class="g-sari">o</span><span class="g-mavi">g</span><span class="g-yesil">l</span><span class="g-kirmizi">e</span>
+        </div>
+        <div class="metin">Yorum Sayfasına Yönlendiriliyorsunuz...</div>
+    </div>
 
     <script>
-        // 1. ESNAF LİSTESİ: Yeni esnaflar geldikçe burayı güncelleyeceksin kanka.
-        const dukkanlar = {
-            "01": "https://www.google.com/search?sca_esv=b754fa5c8f084eb3&rlz=1C1GCEA_enTR1027TR1027&sxsrf=APpeQnsxJ4tgfvTZhUQ31Q4XQmdofoz00A:1784334686155&si=APenkKm7iecQ4G6P-TsbSMFKIQtv3EFIqRAFw-i8uEbk55Z-_5IUNRah6RZtytet6OIV9LO8dYGJCG3Q8U9wwWxaFSJPj-sdKEum6M71V3weEQi2_SHZQZEMhcj5KsgKoxTbFRasJtGA&q=Cix+makarna+Yorumlar&sa=X&ved=2ahUKEwivtYPZ_NqVAxXtVfEDHe6zCs4Q0bkNegQINRAF&biw=1920&bih=919&dpr=1", // 1. Kart (Şimdilik test için Google'a gitsin)
-            "02": "https://www.google.com/search?sca_esv=b754fa5c8f084eb3&rlz=1C1GCEA_enTR1027TR1027&sxsrf=APpeQnsOrfYtKfdiGJnk_icB-r9NbskiKw:1784334931185&si=APenkKm7iecQ4G6P-TsbSMFKIQtv3EFIqRAFw-i8uEbk55Z-_-UYjYXQ6a8IpDmqW7Avh0Qufzv9dOmtgZUmgFFDoiZp52GUycPjOAITvsgtdHCp4CpBIA8ko3UqjCtwlgK-3UcHcQUkZwykuoz6N6sNV9Mj-JiuRs43yLQoVv1Mwy8laENTWyg%3D&q=Aksa+Kebap+ci%C4%9Fer+Lahmacun+ve+pide+Salonu+Yorumlar&sa=X&ved=2ahUKEwjv7-7N_dqVAxWgdPEDHSOZHZMQ0bkNegQIOxAF&biw=1920&bih=919&dpr=1", // 2. Kart
-            "03": "", // 3. Kart
-            "04": "",
-            "05": "",
-            "06": "",
-            "07": "",
-            "08": "",
-            "09": "",
-            "10": "",
-            "11": "https://google.com",
-            "12": "https://google.com",
-            "13": "https://google.com",
-            "14": "https://google.com",
-            "15": "https://google.com",
-            "16": "https://google.com",
-            "17": "https://google.com",
-            "18": "https://google.com",
-            "19": "https://google.com",
-            "20": "https://google.com"  // 20. Kart
+        // =========================================================================
+        // 🎯 KANKA DÜKKAN LİNKLERİNİ SADECE BURADAKİ KUTULARIN İÇİNE YAZACAKSIN!
+        // =========================================================================
+        const dukkanLinkleri = {
+            "01": "https://search.google.com/local/writereview?placeid=BURAYA_1_DÜKKANIN_IDSI",
+            "02": "https://search.google.com/local/writereview?placeid=BURAYA_2_DÜKKANIN_IDSI",
+            "03": "https://search.google.com/local/writereview?placeid=BURAYA_3_DÜKKANIN_IDSI",
+            "04": "https://search.google.com/local/writereview?placeid=BURAYA_4_DÜKKANIN_IDSI",
+            "05": "https://search.google.com/local/writereview?placeid=BURAYA_5_DÜKKANIN_IDSI",
+            "06": "https://search.google.com/local/writereview?placeid=BURAYA_6_DÜKKANIN_IDSI",
+            "07": "https://search.google.com/local/writereview?placeid=BURAYA_7_DÜKKANIN_IDSI",
+            "08": "https://search.google.com/local/writereview?placeid=BURAYA_8_DÜKKANIN_IDSI",
+            "09": "https://search.google.com/local/writereview?placeid=BURAYA_9_DÜKKANIN_IDSI",
+            "10": "https://search.google.com/local/writereview?placeid=BURAYA_10_DÜKKANIN_IDSI",
+            "100": "https://search.google.com/local/writereview?placeid=BURAYA_100_DÜKKANIN_IDSI"
+            // Sınır yok kanka, yeni kart sattıkça altına "11": "link" şeklinde ekleyebilirsin.
         };
+        // =========================================================================
 
-        // 2. Linkin sonundaki ID'yi okuma (Örn: ?id=01)
-        const urlParams = new URLSearchParams(window.location.search);
-        const kartId = urlParams.get('id');
+        // Otomatik Akıllı Yönlendirici Fonksiyon
+        function yonlendir() {
+            // Tarayıcı adres çubuğundaki ?id=XX parametresini şak diye yakalar
+            const urlParametreleri = new URLSearchParams(window.location.search);
+            const kartID = urlParametreleri.get('id');
 
-        // 3. Yönlendirme mantığı
-        if (kartId && dukkanlar[kartId]) {
-            window.location.href = dukkanlar[kartId];
-        } else {
-            // ID geçersizse hata vermesin, senin ana profiline gitsin
-            window.location.href = "https://github.com/mehmetcsr"; 
+            // Eğer ID adreste varsa ve yukarıdaki listemizde tanımlıysa
+            if (kartID && dukkanLinkleri[kartID]) {
+                // Müşteriyi doğrudan o dükkanın Google linkine uçurur
+                window.location.href = dukkanLinkleri[kartID];
+            } else {
+                // Eğer ID bulunamazsa veya yanlışsa hata vermesin diye esnafın ana sayfasına veya senin ana sayfana çıksın
+                document.querySelector('.metin').innerText = "Geçersiz veya Eksik Kart Numarası!";
+                document.querySelector('.spinner').style.display = 'none';
+            }
         }
+
+        // Sayfa açılır açılmaz yönlendirmeyi başlat
+        window.onload = yonlendir;
     </script>
+
 </body>
 </html>
