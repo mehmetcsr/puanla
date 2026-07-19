@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Meta etiketleri ile tarayıcıya bu sayfayı asla hafızaya alma diyoruz -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -20,6 +19,7 @@
         }
         .yukleniyor-kutu {
             text-align: center;
+            padding: 20px;
         }
         .logo {
             font-size: 32px;
@@ -55,11 +55,11 @@
 <body>
 
     <div class="yukleniyor-kutu">
-        <div class="spinner"></div>
+        <div id="spinner" class="spinner"></div>
         <div class="logo">
             <span class="g-mavi">G</span><span class="g-kirmizi">o</span><span class="g-sari">o</span><span class="g-mavi">g</span><span class="g-yesil">l</span><span class="g-kirmizi">e</span>
         </div>
-        <div class="metin">Yorum Sayfasina Yonlendiriliyorsunuz...</div>
+        <div id="metin" class="metin">Yorum Sayfasina Yonlendiriliyorsunuz...</div>
     </div>
 
     <script>
@@ -67,22 +67,29 @@
         // 🎯 PANELİNDEN YAPTIĞIN GÜNCELLEMELER OTOMATİK OLARAK BU LİSTEYE YAZILACAK!
         // =========================================================================
         const dukkanLinkleri = {
-         
-        ,    "10": "https://www.youtube.com/watch?v=7zp1TbLFPp8"
+            "01": "https://search.google.com/local/writereview?placeid=ChIJ",
+            "02": "https://search.google.com/local/writereview?placeid=ChIJ"
         };
         // =========================================================================
 
         function yonlendir() {
             const urlParametreleri = new URLSearchParams(window.location.search);
-            const kartID = urlParametreleri.get('id');
+            let kartID = urlParametreleri.get('id');
+
+            // ID'nin tek haneli gelme ihtimaline karşı (örn: 1 yerine 01 yapmak)
+            if (kartID && kartID.length === 1) {
+                kartID = "0" + kartID;
+            }
 
             if (kartID && dukkanLinkleri[kartID]) {
-                // 🎯 Orijinal temiz linki hiç bozmadan direkt yönlendiriyoruz kanka.
-                // Önbelleği yukarıdaki <meta> etiketleri zaten hallediyor.
                 window.location.href = dukkanLinkleri[kartID];
             } else {
-                document.querySelector('.metin').innerText = "Gecersiz veya Eksik Kart Numarasi!";
-                document.querySelector('.spinner').style.display = 'none';
+                document.getElementById('spinner').style.display = 'none';
+                if (!kartID) {
+                    document.getElementById('metin').innerText = "Hata: Kart ID bulunamadi! (Link sonuna ?id=01 ekleyin)";
+                } else {
+                    document.getElementById('metin').innerText = "Hata: " + kartID + " ID'li karta tanimli bir dukkan linki bulunamadi!";
+                }
             }
         }
 
