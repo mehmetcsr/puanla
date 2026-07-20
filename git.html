@@ -11,23 +11,18 @@
             kartID = "0" + kartID;
         }
 
-        // CountAPI hit isteği (no-cors modunda hızlı istek)
         function sayaciArtirAndYonlendir() {
             const hedef = `index.html?ID=${kartID}`;
-            
-            // API isteğini atıyoruz
-            fetch(`https://api.countapi.xyz/hit/mehmetcsr-puanla/${kartID}`, { mode: 'cors' })
+
+            fetch(`https://api.countapi.xyz/hit/mehmetcsr-puanla/${kartID}`)
                 .then(res => res.json())
                 .then(data => {
-                    console.log("Yeni Sayı:", data.value);
                     window.location.href = hedef;
                 })
                 .catch(err => {
-                    console.log("Hata:", err);
                     window.location.href = hedef;
                 });
 
-            // Yönlendirmenin takılmaması için maksimum 800ms güvenlik zamanlayıcısı
             setTimeout(() => {
                 window.location.href = hedef;
             }, 800);
