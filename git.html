@@ -11,24 +11,25 @@
             kartID = "0" + kartID;
         }
 
-        function sayaciArtirAndYonlendir() {
+        function yonlendir() {
             const hedef = `index.html?ID=${kartID}`;
 
-            fetch(`https://api.countapi.xyz/hit/mehmetcsr-puanla/${kartID}`)
-                .then(res => res.json())
-                .then(data => {
+            // Kesintisiz CounterAPI endpoint'i kullanıyoruz
+            fetch(`https://counterapi.com/api/mehmetcsr-puanla/up/${kartID}`)
+                .then(() => {
                     window.location.href = hedef;
                 })
-                .catch(err => {
+                .catch(() => {
                     window.location.href = hedef;
                 });
 
+            // Güvenlik zamanlayıcısı (en geç 600ms içinde aktarır)
             setTimeout(() => {
                 window.location.href = hedef;
-            }, 800);
+            }, 600);
         }
 
-        window.onload = sayaciArtirAndYonlendir;
+        window.onload = yonlendir;
     </script>
 </head>
 <body style="background:#ffffff; font-family:sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; margin:0;">
