@@ -11,13 +11,16 @@
         function yonlendir() {
             const hedef = `index.html?id=${kartID}`;
 
-            // Doğrudan sayacı 1 artırır
+            // Sayacı +1 artırır (Arka planda çalışır, takılmaz)
             fetch(`https://api.counterapi.dev/v1/mehmetcsr-puanla-${kartID}/sayac/up`)
-                .then(() => { window.location.href = hedef; })
-                .catch(() => { window.location.href = hedef; });
+                .finally(() => {
+                    window.location.href = hedef;
+                });
 
-            // Bekleme olmaması için 400ms sınırı
-            setTimeout(() => { window.location.href = hedef; }, 400);
+            // 300ms içinde yanıt gelmezse ne olursa olsun dükkana yönlendirir
+            setTimeout(() => {
+                window.location.href = hedef;
+            }, 300);
         }
 
         window.onload = yonlendir;
