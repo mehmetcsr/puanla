@@ -21,40 +21,45 @@
             const hedef = `index.html?id=${kartID}`;
 
             try {
-                // Ön bellek bypass için zaman damgası ekliyoruz
-                const cacheBuster = new Date().getTime();
-                
-                // 1. Önce mevcut veriyi çek
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/sayac?id=eq.${kartID}&select=toplam&_t=${cacheBuster}`, {
+                const ts = Date.now();
+                // 1. Kart var mı kontrol et
+                const getRes = await fetch(`${SUPABASE_URL}/rest/v1/sayac?id=eq.${kartID}&select=toplam&_t=${ts}`, {
                     headers: {
                         'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Cache-Control': 'no-cache'
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
                     }
                 });
-                const data = await res.json();
+                
+                const data = await getRes.json();
 
-                let yeniSayi = 1;
                 if (Array.isArray(data) && data.length > 0) {
-                    yeniSayi = Number(data[0].toplam) + 1;
+                    // Kayıt varsa: Sayıyı +1 yapıp PATCH atıyoruz
+                    const yeniToplam = (data[0].toplam || 0) + 1;
+                    await fetch(`${SUPABASE_URL}/rest/v1/sayac?id=eq.${kartID}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ toplam: yeniToplam })
+                    });
+                } else {
+                    // Kayıt yoksa: Yeni kart satırı açıyoruz
+                    await fetch(`${SUPABASE_URL}/rest/v1/sayac`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ id: kartID, toplam: 1 })
+                    });
                 }
-
-                // 2. Supabase'e yaz/güncelle
-                await fetch(`${SUPABASE_URL}/rest/v1/sayac`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'resolution=merge-duplicates',
-                        'Cache-Control': 'no-cache'
-                    },
-                    body: JSON.stringify({ id: kartID, toplam: yeniSayi })
-                });
-            } catch (e) {
-                console.error("Hata:", e);
+            } catch (err) {
+                console.error("Hata:", err);
             } finally {
-                // İstek tamamlandıktan sonra güvenli yönlendirme
+                // Her halükarda yönlendir
                 window.location.href = hedef;
             }
         }
