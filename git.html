@@ -2,6 +2,9 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Yönlendiriliyorsunuz...</title>
     <script>
         const SUPABASE_URL = "https://ajvaubkvptdrxccjpapb.supabase.co";
@@ -18,11 +21,15 @@
             const hedef = `index.html?id=${kartID}`;
 
             try {
-                // 1. Önce mevcut sayıyı çekiyoruz
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/sayac?id=eq.${kartID}&select=toplam`, {
+                // Ön bellek bypass için zaman damgası ekliyoruz
+                const cacheBuster = new Date().getTime();
+                
+                // 1. Önce mevcut veriyi çek
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/sayac?id=eq.${kartID}&select=toplam&_t=${cacheBuster}`, {
                     headers: {
                         'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Cache-Control': 'no-cache'
                     }
                 });
                 const data = await res.json();
@@ -32,24 +39,23 @@
                     yeniSayi = Number(data[0].toplam) + 1;
                 }
 
-                // 2. Supabase Upsert (Varsa sayıyı artırır, yoksa yeni satır açar)
+                // 2. Supabase'e yaz/güncelle
                 await fetch(`${SUPABASE_URL}/rest/v1/sayac`, {
                     method: 'POST',
                     headers: {
                         'apikey': SUPABASE_KEY,
                         'Authorization': `Bearer ${SUPABASE_KEY}`,
                         'Content-Type': 'application/json',
-                        'Prefer': 'resolution=merge-duplicates'
+                        'Prefer': 'resolution=merge-duplicates',
+                        'Cache-Control': 'no-cache'
                     },
                     body: JSON.stringify({ id: kartID, toplam: yeniSayi })
                 });
             } catch (e) {
                 console.error("Hata:", e);
             } finally {
-                // Sayacı güncelleyip 300ms sonra dükkana uçurur
-                setTimeout(() => {
-                    window.location.href = hedef;
-                }, 300);
+                // İstek tamamlandıktan sonra güvenli yönlendirme
+                window.location.href = hedef;
             }
         }
 
