@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Yönlendiriliyorsunuz...</title>
+    <script>
+        // URL'den ID'yi alır (Örn: git.html?ID=01)
+        const urlParams = new URLSearchParams(window.location.search);
+        let kartID = urlParams.get('ID') || '01';
+
+        // ID tek haneliyse başına 0 ekler (1 yerine 01)
+        if (kartID.length === 1) {
+            kartID = "0" + kartID;
+        }
+
+        // 1. Tıklamayı arka planda sayaca +1 olarak kaydet
+        fetch(`https://api.countapi.xyz/hit/mehmetcsr-puanla/${kartID}`)
+            .then(() => {
+                // 2. Sayacı artırdıktan sonra senin çalışan asıl index.html sayfana gönder
+                window.location.href = `index.html?ID=${kartID}`;
+            })
+            .catch(() => {
+                // İnternet yavaşsa bile müşteriyi bekletme, direkt index.html'e gönder
+                window.location.href = `index.html?ID=${kartID}`;
+            });
+    </script>
+</head>
+<body style="background:#ffffff; font-family:sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; margin:0;">
+    <p style="color:#64748b; font-weight:600;">Yönlendiriliyorsunuz...</p>
+</body>
+</html>
