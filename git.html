@@ -4,25 +4,36 @@
     <meta charset="UTF-8">
     <title>Yönlendiriliyorsunuz...</title>
     <script>
-        // URL'den ID'yi alır (Örn: git.html?ID=01)
         const urlParams = new URLSearchParams(window.location.search);
         let kartID = urlParams.get('ID') || '01';
 
-        // ID tek haneliyse başına 0 ekler (1 yerine 01)
         if (kartID.length === 1) {
             kartID = "0" + kartID;
         }
 
-        // 1. Tıklamayı arka planda sayaca +1 olarak kaydet
-        fetch(`https://api.countapi.xyz/hit/mehmetcsr-puanla/${kartID}`)
-            .then(() => {
-                // 2. Sayacı artırdıktan sonra senin çalışan asıl index.html sayfana gönder
-                window.location.href = `index.html?ID=${kartID}`;
-            })
-            .catch(() => {
-                // İnternet yavaşsa bile müşteriyi bekletme, direkt index.html'e gönder
-                window.location.href = `index.html?ID=${kartID}`;
-            });
+        // CountAPI hit isteği (no-cors modunda hızlı istek)
+        function sayaciArtirAndYonlendir() {
+            const hedef = `index.html?ID=${kartID}`;
+            
+            // API isteğini atıyoruz
+            fetch(`https://api.countapi.xyz/hit/mehmetcsr-puanla/${kartID}`, { mode: 'cors' })
+                .then(res => res.json())
+                .then(data => {
+                    console.log("Yeni Sayı:", data.value);
+                    window.location.href = hedef;
+                })
+                .catch(err => {
+                    console.log("Hata:", err);
+                    window.location.href = hedef;
+                });
+
+            // Yönlendirmenin takılmaması için maksimum 800ms güvenlik zamanlayıcısı
+            setTimeout(() => {
+                window.location.href = hedef;
+            }, 800);
+        }
+
+        window.onload = sayaciArtirAndYonlendir;
     </script>
 </head>
 <body style="background:#ffffff; font-family:sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; margin:0;">
