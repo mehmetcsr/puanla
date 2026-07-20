@@ -34,21 +34,20 @@
 
     <div class="kart">
         <div class="baslik">Masa QR Okunma Sayısı</div>
-        <div class="sayac" id="sayi">0</div>
+        <div class="sayac" id="sayi">...</div>
         <div class="rozet">🟢 Canlı Veri</div>
         <button class="buton" onclick="veriyiCek()">Sayfayı Yenile</button>
     </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        let kartID = urlParams.get('ID') || '01';
+        let kartID = urlParams.get('id') || urlParams.get('ID') || '01';
         if (kartID.length === 1) kartID = "0" + kartID;
 
         function veriyiCek() {
             fetch(`https://counterapi.com/api/mehmetcsr-puanla/get/${kartID}`)
                 .then(res => res.json())
                 .then(data => {
-                    // CounterAPI yanıt yapısı
                     document.getElementById('sayi').innerText = data.value || data.count || 0;
                 })
                 .catch(() => {
