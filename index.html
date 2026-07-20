@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Google Yorum Yonlendirme Sistemi</title>
+    <title>Google Yorum Yönlendirme Sistemi</title>
     <style>
         body {
             background-color: #ffffff;
@@ -59,7 +59,7 @@
         <div class="logo">
             <span class="g-mavi">G</span><span class="g-kirmizi">o</span><span class="g-sari">o</span><span class="g-mavi">g</span><span class="g-yesil">l</span><span class="g-kirmizi">e</span>
         </div>
-        <div id="metin" class="metin">Yorum Sayfasina Yonlendiriliyorsunuz...</div>
+        <div id="metin" class="metin">Yorum Sayfasına Yönlendiriliyorsunuz...</div>
     </div>
 
     <script>
@@ -67,29 +67,42 @@
         // 🎯 PANELİNDEN YAPTIĞIN GÜNCELLEMELER OTOMATİK OLARAK BU LİSTEYE YAZILACAK!
         // =========================================================================
         const dukkanLinkleri = {
-          
-           "10": "https://www.youtube.com/watch?v=7zp1TbLFPp8"
-        ,    "01": "https://www.yemeksepeti.com/restaurant/jb0z/cix-makarna?srsltid=AfmBOoocgINvqgncD-aaNtdVREfpId-ZKYxsiLhUa4eP7xt_TjyGFlUt"
+            "10": "https://www.youtube.com/watch?v=7zp1TbLFPp8",
+            "01": "https://www.yemeksepeti.com/restaurant/jb0z/cix-makarna?srsltid=AfmBOoocgINvqgncD-aaNtdVREfpId-ZKYxsiLhUa4eP7xt_TjyGFlUt"
         };
         // =========================================================================
 
         function yonlendir() {
             const urlParametreleri = new URLSearchParams(window.location.search);
-            let kartID = urlParametreleri.get('id');
+            let kartID = urlParametreleri.get('id') || urlParametreleri.get('ID');
 
-            // ID'nin tek haneli gelme ihtimaline karşı (örn: 1 yerine 01 yapmak)
             if (kartID && kartID.length === 1) {
                 kartID = "0" + kartID;
             }
 
             if (kartID && dukkanLinkleri[kartID]) {
-                window.location.href = dukkanLinkleri[kartID];
+                const hedefLink = dukkanLinkleri[kartID];
+
+                // Arka planda sayacı +1 yapıyoruz (CounterAPI)
+                fetch(`https://counterapi.com/api/mehmetcsr-puanla/up/${kartID}`)
+                    .then(() => {
+                        window.location.href = hedefLink;
+                    })
+                    .catch(() => {
+                        window.location.href = hedefLink;
+                    });
+
+                // Her ihtimale karşı 600ms güvenlik zamanlayıcısı
+                setTimeout(() => {
+                    window.location.href = hedefLink;
+                }, 600);
+
             } else {
                 document.getElementById('spinner').style.display = 'none';
                 if (!kartID) {
-                    document.getElementById('metin').innerText = "Hata: Kart ID bulunamadi! (Link sonuna ?id=01 ekleyin)";
+                    document.getElementById('metin').innerText = "Hata: Kart ID bulunamadı! (Link sonuna ?id=01 ekleyin)";
                 } else {
-                    document.getElementById('metin').innerText = "Hata: " + kartID + " ID'li karta tanimli bir dukkan linki bulunamadi!";
+                    document.getElementById('metin').innerText = "Hata: " + kartID + " ID'li karta tanımlı bir dükkan linki bulunamadı!";
                 }
             }
         }
