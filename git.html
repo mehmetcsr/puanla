@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Yönlendiriliyorsunuz...</title>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        let kartID = urlParams.get('id') || urlParams.get('ID') || '01';
+
+        if (kartID.length === 1) {
+            kartID = "0" + kartID;
+        }
+
+        function yonlendir() {
+            const hedef = `index.html?id=${kartID}`;
+
+            // Sayaç servisine istek atıyoruz
+            fetch(`https://api.counterapi.dev/v1/mehmetcsr-puanla/${kartID}/up`)
+                .then(() => { window.location.href = hedef; })
+                .catch(() => { window.location.href = hedef; });
+
+            setTimeout(() => {
+                window.location.href = hedef;
+            }, 600);
+        }
+
+        window.onload = yonlendir;
+    </script>
+</head>
+<body style="background:#ffffff; font-family:sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; margin:0;">
+    <p style="color:#64748b; font-weight:600;">Yönlendiriliyorsunuz...</p>
+</body>
+</html>
