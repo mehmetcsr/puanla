@@ -2,42 +2,22 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <title>Yönlendiriliyorsunuz...</title>
     <script>
-        const SUPABASE_URL = "https://ajvaubkvptdrxccjpapb.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_WEkoMrOEP5p67wsOCbkshw_ju33ClTn";
-
         const urlParams = new URLSearchParams(window.location.search);
         let kartID = urlParams.get('id') || urlParams.get('ID') || '01';
+        if (kartID.length === 1) kartID = "0" + kartID;
 
-        if (kartID.length === 1) {
-            kartID = "0" + kartID;
-        }
-
-        async function yonlendir() {
+        function yonlendir() {
             const hedef = `index.html?id=${kartID}`;
 
-            try {
-                // Supabase veritabanı fonksiyonunu doğrudan tetikliyoruz
-                await fetch(`${SUPABASE_URL}/rest/v1/rpc/kart_artir`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ k_id: kartID }),
-                    keepalive: true // Yönlendirme olsa bile arka planda isteği tamamlar!
-                });
-            } catch (err) {
-                console.error("Hata:", err);
-            } finally {
-                // Her durumda yönlendir
-                window.location.href = hedef;
-            }
+            // Doğrudan sayacı 1 artırır
+            fetch(`https://api.counterapi.dev/v1/mehmetcsr-puanla-${kartID}/sayac/up`)
+                .then(() => { window.location.href = hedef; })
+                .catch(() => { window.location.href = hedef; });
+
+            // Bekleme olmaması için 400ms sınırı
+            setTimeout(() => { window.location.href = hedef; }, 400);
         }
 
         window.onload = yonlendir;
