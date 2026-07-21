@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Kod Oluşturucu - Ortada ID</title>
+    <title>QR Kod Oluşturucu - Tasarımsal Orta ID</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         body {
@@ -81,7 +81,7 @@
         <div id="geciciQr"></div>
 
         <div id="qrSonuc">
-            <img id="finalGorsel" src="" alt="Ortalı Numaralı QR Kod">
+            <img id="finalGorsel" src="" alt="Sık Şık Numaralı QR Kod">
             <a id="indirLink" download="qr.png">
                 <button class="indir-btn">QR Kodu İndir (PNG)</button>
             </a>
@@ -105,20 +105,20 @@
 
             new QRCode(geciciDiv, {
                 text: yonlendirmeUrl,
-                width: 300,
-                height: 300,
+                width: 320,
+                height: 320,
                 correctLevel: QRCode.CorrectLevel.H
             });
 
             setTimeout(() => {
                 const qrCanvas = geciciDiv.querySelector('canvas');
                 if (qrCanvas) {
-                    TAM_ORTAYA_YAZ(qrCanvas, id);
+                    estetikLogoEkle(qrCanvas, id);
                 }
             }, 100);
         }
 
-        function TAM_ORTAYA_YAZ(orijinalCanvas, id) {
+        function estetikLogoEkle(orijinalCanvas, id) {
             const width = orijinalCanvas.width;
             const height = orijinalCanvas.height;
 
@@ -127,31 +127,51 @@
             finalCanvas.height = height;
             const ctx = finalCanvas.getContext('2d');
 
-            // 1. QR Kodu çiz
+            // 1. Orijinal QR Kodu çiz
             ctx.drawImage(orijinalCanvas, 0, 0);
 
-            // 2. TAM MERKEZE BEYAZ KUTU (Köşelerde hiçbir şey yok!)
-            const kutuEn = 38;
-            const kutuBoy = 32;
+            // 2. Rozet (Logo) Ölçüleri
+            const kutuEn = 44;
+            const kutuBoy = 36;
             const x = (width - kutuEn) / 2;
             const y = (height - kutuBoy) / 2;
+            const kavis = 8;
 
+            // 3. Hafif Yumuşak Gölge Efekti
+            ctx.save();
+            ctx.shadowColor = "rgba(0, 0, 0, 0.15)";
+            ctx.shadowBlur = 6;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 2;
+
+            // Arka Plan Beyaz Rozet
             ctx.fillStyle = "#ffffff";
-            
+            ctx.beginPath();
             if (ctx.roundRect) {
-                ctx.beginPath();
-                ctx.roundRect(x, y, kutuEn, kutuBoy, 6);
-                ctx.fill();
+                ctx.roundRect(x, y, kutuEn, kutuBoy, kavis);
             } else {
                 ctx.fillRect(x, y, kutuEn, kutuBoy);
             }
+            ctx.fill();
+            ctx.restore(); // Gölge efektini kapat (yazıya yansımasın)
 
-            // 3. ZARİF FONT İLE TAM ORTAYA YAZ
+            // 4. İnce Şık Çerçeve (Border)
+            ctx.strokeStyle = "#e2e8f0";
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            if (ctx.roundRect) {
+                ctx.roundRect(x, y, kutuEn, kutuBoy, kavis);
+            } else {
+                ctx.strokeRect(x, y, kutuEn, kutuBoy);
+            }
+            ctx.stroke();
+
+            // 5. Şık Tipografi ile Numarayı Yaz
             ctx.fillStyle = "#0f172a";
-            ctx.font = "bold 16px 'Segoe UI', Arial, sans-serif";
+            ctx.font = "bold 16px 'Segoe UI', system-ui, -apple-system, sans-serif";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText(id, width / 2, height / 2);
+            ctx.fillText(id, width / 2, height / 2 + 1);
 
             // Çıktı
             const resimData = finalCanvas.toDataURL("image/png");
