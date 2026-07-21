@@ -113,12 +113,12 @@
             setTimeout(() => {
                 const qrCanvas = geciciDiv.querySelector('canvas');
                 if (qrCanvas) {
-                    ortayaNumaraEkle(qrCanvas, id);
+                    ortayaZarifNumaraEkle(qrCanvas, id);
                 }
             }, 100);
         }
 
-        function ortayaNumaraEkle(orijinalCanvas, id) {
+        function ortayaZarifNumaraEkle(orijinalCanvas, id) {
             const width = orijinalCanvas.width;
             const height = orijinalCanvas.height;
 
@@ -127,23 +127,29 @@
             finalCanvas.height = height;
             const ctx = finalCanvas.getContext('2d');
 
-            // 1. QR Kodu çiz
+            // 1. Orijinal QR Kodu çiz
             ctx.drawImage(orijinalCanvas, 0, 0);
 
-            // 2. Tam orta merkeze küçük beyaz zemin kutusu
-            const kutuBoyut = 42;
-            const x = (width - kutuBoyut) / 2;
-            const y = (height - kutuBoyut) / 2;
+            // 2. Tam merkeze minimalist ve zarif beyaz kutu
+            const kutuEn = 36;
+            const kutuBoy = 30;
+            const x = (width - kutuEn) / 2;
+            const y = (height - kutuBoy) / 2;
 
             ctx.fillStyle = "#ffffff";
-            // Köşeleri hafif yuvarlatılmış şık beyaz kutu
-            ctx.beginPath();
-            ctx.roundRect(x, y, kutuBoyut, kutuBoyut, 6);
-            ctx.fill();
+            
+            // Yuvarlatılmış zarif çerçeve
+            if (ctx.roundRect) {
+                ctx.beginPath();
+                ctx.roundRect(x, y, kutuEn, kutuBoy, 5);
+                ctx.fill();
+            } else {
+                ctx.fillRect(x, y, kutuEn, kutuBoy);
+            }
 
-            // 3. Numarayı tam merkeze küçük puntoyla yaz
-            ctx.fillStyle = "#000000";
-            ctx.font = "bold 18px 'Segoe UI', Arial, sans-serif";
+            // 3. İnce ve şık font ile ID'yi tam merkeze yaz
+            ctx.fillStyle = "#0f172a";
+            ctx.font = "600 15px 'Segoe UI', Arial, sans-serif";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillText(id, width / 2, height / 2);
