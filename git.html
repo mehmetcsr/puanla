@@ -79,12 +79,18 @@
                 const hedefLink = dukkanLinkleri[kartID];
                 const sayacAnahtari = "kart-" + kartID;
 
-                fetch(`https://abacus.jasoncameron.dev/hit/${SAYAC_NAMESPACE}/${sayacAnahtari}`)
-                    .then(() => { window.location.href = hedefLink; })
-                    .catch(() => { window.location.href = hedefLink; });
+                // keepalive: true => sayfa değişse/yönlense bile bu istek arka planda
+                // tamamlanana kadar tarayıcı tarafından kesilmez. Sayaç artık garanti artar.
+                fetch(`https://abacus.jasoncameron.dev/hit/${SAYAC_NAMESPACE}/${sayacAnahtari}`, {
+                    method: 'GET',
+                    keepalive: true
+                }).catch(err => console.log("Sayaç servis hatası:", err));
+
+                // Tek yönlendirme noktası: 300ms, isteğin tetiklenmesi için yeterli,
+                // keepalive sayesinde arka planda tamamlanmaya devam eder.
                 setTimeout(() => {
                     window.location.href = hedefLink;
-                }, 500);
+                }, 300);
 
             } else {
                 document.getElementById('spinner').style.display = 'none';
