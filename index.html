@@ -1,105 +1,30 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <title>Google Yorum Yönlendirme Sistemi</title>
-    <style>
-        body {
-            background-color: #ffffff;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .yukleniyor-kutu {
-            text-align: center;
-            padding: 20px;
-        }
-        .logo {
-            font-size: 32px;
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin-bottom: 20px;
-        }
-        .g-mavi { color: #4285f4; }
-        .g-kirmizi { color: #ea4335; }
-        .g-sari { color: #fabc05; }
-        .g-yesil { color: #34a853; }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #4285f4;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .metin {
-            color: #475569;
-            font-size: 16px;
-            font-weight: 600;
-        }
-    </style>
-</head>
-<body>
+function qrKodaIdEkle(qrCanvasElement, kartID) {
+    // 1. Orijinal QR boyutlarını al
+    const qrWidth = qrCanvasElement.width;
+    const qrHeight = qrCanvasElement.height;
+    
+    // Alt tarafa yazı için 35 piksellik bir alan ekliyoruz
+    const extraHeight = 35;
 
-    <div class="yukleniyor-kutu">
-        <div id="spinner" class="spinner"></div>
-        <div class="logo">
-            <span class="g-mavi">G</span><span class="g-kirmizi">o</span><span class="g-sari">o</span><span class="g-mavi">g</span><span class="g-yesil">l</span><span class="g-kirmizi">e</span>
-        </div>
-        <div id="metin" class="metin">Yorum Sayfasına Yönlendiriliyorsunuz...</div>
-    </div>
+    // 2. Yeni ve birleşik bir Canvas oluşturuyoruz
+    const finalCanvas = document.createElement('canvas');
+    finalCanvas.width = qrWidth;
+    finalCanvas.height = qrHeight + extraHeight;
+    const ctx = finalCanvas.getContext('2d');
 
-    <script>
-        const dukkanLinkleri = {
-            "10": "https://www.youtube.com/watch?v=7zp1TbLFPp8",
-            "01": "https://www.yemeksepeti.com/restaurant/jb0z/cix-makarna?srsltid=AfmBOoocgINvqgncD-aaNtdVREfpId-ZKYxsiLhUa4eP7xt_TjyGFlUt"
-        };
+    // Arka planı beyaz yap
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
 
-        function yonlendir() {
-            const urlParametreleri = new URLSearchParams(window.location.search);
-            let kartID = urlParametreleri.get('id') || urlParametreleri.get('ID');
+    // QR Kodu çiz
+    ctx.drawImage(qrCanvasElement, 0, 0);
 
-            if (kartID && kartID.length === 1) {
-                kartID = "0" + kartID;
-            }
+    // Altına ID Metnini Yaz
+    ctx.fillStyle = "#1e293b"; // Şık koyu gri/lacivert
+    ctx.font = "bold 14px 'Segoe UI', Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Masa No: " + kartID, qrWidth / 2, qrHeight + 22);
 
-            if (kartID && dukkanLinkleri[kartID]) {
-                const hedefLink = dukkanLinkleri[kartID];
-
-                // Kesin çalışan api.counterapi.dev servisi ile artırma
-                fetch(`https://api.counterapi.dev/v1/mehmetcsr-puanla/${kartID}/up`)
-                    .then(() => { window.location.href = hedefLink; })
-                    .catch(() => { window.location.href = hedefLink; });
-
-                setTimeout(() => {
-                    window.location.href = hedefLink;
-                }, 500);
-
-            } else {
-                document.getElementById('spinner').style.display = 'none';
-                if (!kartID) {
-                    document.getElementById('metin').innerText = "Hata: Kart ID bulunamadı!";
-                } else {
-                    document.getElementById('metin').innerText = "Hata: " + kartID + " ID'li dükkan bulunamadı!";
-                }
-            }
-        }
-
-        window.onload = yonlendir;
-    </script>
-
-</body>
-</html>
+    // Artık 'finalCanvas' elimizdeki ID'li yeni QR resmi!
+    return finalCanvas.toDataURL("image/png");
+}
