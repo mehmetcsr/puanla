@@ -81,7 +81,7 @@
         <div id="geciciQr"></div>
 
         <div id="qrSonuc">
-            <img id="finalGorsel" src="" alt="Köşeli Numaralı QR Kod">
+            <img id="finalGorsel" src="" alt="Ortalı Numaralı QR Kod">
             <a id="indirLink" download="qr.png">
                 <button class="indir-btn">QR Kodu İndir (PNG)</button>
             </a>
@@ -113,12 +113,12 @@
             setTimeout(() => {
                 const qrCanvas = geciciDiv.querySelector('canvas');
                 if (qrCanvas) {
-                    sagAltKoseyeNumaraEkle(qrCanvas, id);
+                    ortayaNumaraEkle(qrCanvas, id);
                 }
             }, 100);
         }
 
-        function sagAltKoseyeNumaraEkle(orijinalCanvas, id) {
+        function ortayaNumaraEkle(orijinalCanvas, id) {
             const width = orijinalCanvas.width;
             const height = orijinalCanvas.height;
 
@@ -130,21 +130,23 @@
             // 1. QR Kodu çiz
             ctx.drawImage(orijinalCanvas, 0, 0);
 
-            // 2. Sağ alt köşedeki beyaz temizlik alanı
-            const kutuEn = 50;
-            const kutuBoy = 36;
-            const x = width - kutuEn;
-            const y = height - kutuBoy;
+            // 2. Tam orta merkeze küçük beyaz zemin kutusu
+            const kutuBoyut = 42;
+            const x = (width - kutuBoyut) / 2;
+            const y = (height - kutuBoyut) / 2;
 
             ctx.fillStyle = "#ffffff";
-            ctx.fillRect(x, y, kutuEn, kutuBoy);
+            // Köşeleri hafif yuvarlatılmış şık beyaz kutu
+            ctx.beginPath();
+            ctx.roundRect(x, y, kutuBoyut, kutuBoyut, 6);
+            ctx.fill();
 
-            // 3. Sadece ID'yi (Örn: 01) basıyoruz
+            // 3. Numarayı tam merkeze küçük puntoyla yaz
             ctx.fillStyle = "#000000";
-            ctx.font = "bold 28px 'Segoe UI', Arial, sans-serif";
-            ctx.textAlign = "right";
-            ctx.textBaseline = "bottom";
-            ctx.fillText(id, width - 4, height - 2);
+            ctx.font = "bold 18px 'Segoe UI', Arial, sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(id, width / 2, height / 2);
 
             // Resim çıktısı
             const resimData = finalCanvas.toDataURL("image/png");
