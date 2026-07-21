@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Kod Oluşturucu - Google Renkli Rozet</title>
+    <title>QR Kod Oluşturucu - Canlı Google Renkleri</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         body {
@@ -81,7 +81,7 @@
         <div id="geciciQr"></div>
 
         <div id="qrSonuc">
-            <img id="finalGorsel" src="" alt="Google Renkli QR Kod">
+            <img id="finalGorsel" src="" alt="Canlı Google Renkli QR Kod">
             <a id="indirLink" download="qr.png">
                 <button class="indir-btn">QR Kodu İndir (PNG)</button>
             </a>
@@ -113,12 +113,12 @@
             setTimeout(() => {
                 const qrCanvas = geciciDiv.querySelector('canvas');
                 if (qrCanvas) {
-                    googleRenkliRozetCiz(qrCanvas, id);
+                    canliGoogleRozetCiz(qrCanvas, id);
                 }
             }, 100);
         }
 
-        function googleRenkliRozetCiz(orijinalCanvas, id) {
+        function canliGoogleRozetCiz(orijinalCanvas, id) {
             const width = orijinalCanvas.width;
             const height = orijinalCanvas.height;
             const merkeZX = width / 2;
@@ -129,21 +129,22 @@
             finalCanvas.height = height;
             const ctx = finalCanvas.getContext('2d');
 
-            // 1. QR Kodu tabana çiz
+            // 1. QR Kodu çiz
             ctx.drawImage(orijinalCanvas, 0, 0);
 
-            // 2. Dış Beyaz Güvenlik Alanı (Yarıçap: 28px)
+            // 2. Dış Beyaz Koruma Alanı (Yarıçap: 30px)
             ctx.fillStyle = "#ffffff";
             ctx.beginPath();
-            ctx.arc(merkeZX, merkeZY, 28, 0, 2 * Math.PI);
+            ctx.arc(merkeZX, merkeZY, 30, 0, 2 * Math.PI);
             ctx.fill();
 
-            // 3. Google Renkli Çerçeve Dilimleri (4 Renk Dilimi)
-            const renkler = ['#4285F4', '#EA4335', '#FBBC05', '#34A853']; // Mavi, Kırmızı, Sarı, Yeşil
-            const yaricapDis = 23;
+            // 3. Canlı Google Renk Dilimleri (Yarıçap: 25px)
+            // Tam Google Hex Kodları: Mavi, Kırmızı, Sarı, Yeşil
+            const canliRenkler = ['#4285F4', '#EA4335', '#FBBC05', '#34A853']; 
+            const yaricapDis = 25;
 
             for (let i = 0; i < 4; i++) {
-                ctx.fillStyle = renkler[i];
+                ctx.fillStyle = canliRenkler[i];
                 ctx.beginPath();
                 ctx.moveTo(merkeZX, merkeZY);
                 ctx.arc(merkeZX, merkeZY, yaricapDis, (i * Math.PI) / 2, ((i + 1) * Math.PI) / 2);
@@ -151,15 +152,15 @@
                 ctx.fill();
             }
 
-            // 4. İç Beyaz Göbek Kısım (Yarıçap: 17px - Böylece renkli halkanın kalınlığı 6px kalır)
+            // 4. İç Beyaz Göbek (Yarıçap: 17px -> Renkli halkanın et kalınlığı tam 8px)
             ctx.fillStyle = "#ffffff";
             ctx.beginPath();
             ctx.arc(merkeZX, merkeZY, 17, 0, 2 * Math.PI);
             ctx.fill();
 
-            // 5. ID Numarasını Tam Ortaya Yaz (Siyah/Lacivert)
+            // 5. ID Numarası (Koyu Net Siyah)
             ctx.fillStyle = "#0f172a";
-            ctx.font = "bold 15px 'Segoe UI', Arial, sans-serif";
+            ctx.font = "bold 16px 'Segoe UI', Arial, sans-serif";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillText(id, merkeZX, merkeZY + 1);
