@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masa QR Kod Oluşturucu</title>
+    <!-- QR Kod Kütüphanesi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .kart {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+        }
+        h2 { color: #1e293b; margin-bottom: 20px; font-size: 22px; }
+        .girdi-grubu { text-align: left; margin-bottom: 15px; }
+        label { display: block; font-size: 13px; font-weight: 700; color: #64748b; margin-bottom: 5px; }
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            outline: none;
+        }
+        input:focus { border-color: #4285f4; }
+        button {
+            width: 100%;
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { background: #3367d6; }
+        #qrSonuc { margin-top: 25px; display: none; }
+        #finalGorsel {
+            max-width: 100%;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .indir-btn {
+            background: #10b981;
+            margin-top: 15px;
+        }
+        .indir-btn:hover { background: #059669; }
+        /* Gizli QR Çizim Alanı */
+        #geciciQr { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="kart">
+        <h2>Masa QR Oluşturucu</h2>
+        
+        <div class="girdi-grubu">
+            <label>Masa / Kart ID (Örn: 01, 02):</label>
+            <input type="text" id="kartId" placeholder="Örn: 01" value="01">
+        </div>
+
+        <button onclick="qrOlustur()">QR Kodu Oluştur</button>
+
+        <!-- Gizli geçici QR elementı -->
+        <div id="geciciQr"></div>
+
+        <!-- Ekrana basılacak etiketli bitmiş görsel -->
+        <div id="qrSonuc">
+            <img id="finalGorsel" src="" alt="Etiketli QR Kod">
+            <a id="indirLink" download="masa-qr.png">
+                <button class="indir-btn">QR Kodu İndir (PNG)</button>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function qrOlustur() {
+            let id = document.getElementById('kartId').value.trim();
+            if (!id) {
+                alert("Lütfen bir Kart ID girin!");
+                return;
+            }
+
+            if (id.length === 1) id = "0" + id;
+
+            // Yönlendirme Linkin (Giriş Adresin)
+            const yonlendirmeUrl = `https://mehmetcsr.github.io/puanla/git.html?id=${id}`;
+
+            // 1. Geçici gizli alanı temizle ve QR kodu çizdir
+            const geciciDiv = document.getElementById('geciciQr');
+            geciciDiv.innerHTML = "";
+
+            new QRCode(geciciDiv, {
+                text: yonlendirmeUrl,
+                width: 250,
+                height: 250,
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // QR kod kütüphanesi resmi üretene kadar 100ms bekle
+            setTimeout(() => {
+                const qrCanvas = geciciDiv.querySelector('canvas');
+                if (qrCanvas) {
+                    // 2. Canvas üzerinde etiket ekleme işlemini başlat
+                    canvasEtiketEkle(qrCanvas, id);
+                }
+            }, 100);
+        }
+
+        function canvasEtiketEkle(orijinalCanvas, id) {
+            const qrEn = orijinalCanvas.width;
+            const qrBoy = orijinalCanvas.height;
+            const etiketYukseklik = 45; // Alt tarafa eklenecek şerit yüksekliği
+
+            // Yeni birleşik canvas oluştur
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = qrEn;
+            finalCanvas.height = qrBoy + etiketYukseklik;
+            const ctx = finalCanvas.getContext('2d');
+
+            // Arka planı bembeyaz yap
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+            // Orijinal QR Kodu üste çiz
+            ctx.drawImage(orijinalCanvas, 0, 0);
+
+            // Ayırıcı ince çizgi çek (Opsiyonel, şık dursun diye)
+            ctx.strokeStyle = "#f1f5f9";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(15, qrBoy);
+            ctx.lineTo(qrEn - 15, qrBoy);
+            ctx.stroke();
+
+            // Alt şeride ID Metnini Yaz
+            ctx.fillStyle = "#0f172a"; // Şık koyu renk
+            ctx.font = "bold 16px 'Segoe UI', Arial, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("Masa No: " + id, qrEn / 2, qrBoy + 28);
+
+            // Üretilen resmi img tagına bas ve indirme linkini hazırla
+            const resimData = finalCanvas.toDataURL("image/png");
+            
+            document.getElementById('finalGorsel').src = resimData;
+            document.getElementById('indirLink').href = resimData;
+            document.getElementById('indirLink').download = `Masa_QR_${id}.png`;
+            document.getElementById('qrSonuc').style.display = "block";
+        }
+    </script>
+
+</body>
+</html>
