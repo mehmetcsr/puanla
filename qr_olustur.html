@@ -132,33 +132,33 @@
             // 1. QR Kodu tabana çiz
             ctx.drawImage(orijinalCanvas, 0, 0);
 
-            // 2. Dış Beyaz Güvenlik Alanı (Yarıçap: 27px)
+            // 2. Dış Beyaz Güvenlik Alanı (Yarıçap: 28px)
             ctx.fillStyle = "#ffffff";
             ctx.beginPath();
-            ctx.arc(merkeZX, merkeZY, 27, 0, 2 * Math.PI);
+            ctx.arc(merkeZX, merkeZY, 28, 0, 2 * Math.PI);
             ctx.fill();
 
-            // 3. Google 4 Renkli Dairesel Çerçeve (Yarıçap: 22px)
-            const gradient = ctx.createConicGradient(0, merkeZX, merkeZY);
-            gradient.addColorStop(0, '#4285F4');    // Google Mavi
-            gradient.addColorStop(0.25, '#EA4335'); // Google Kırmızı
-            gradient.addColorStop(0.5, '#FBBC05');  // Google Sarı
-            gradient.addColorStop(0.75, '#34A853'); // Google Yeşil
-            gradient.addColorStop(1, '#4285F4');    // Bağlantı için tekrar Mavi
+            // 3. Google Renkli Çerçeve Dilimleri (4 Renk Dilimi)
+            const renkler = ['#4285F4', '#EA4335', '#FBBC05', '#34A853']; // Mavi, Kırmızı, Sarı, Yeşil
+            const yaricapDis = 23;
 
-            ctx.fillStyle = gradient;
-            ctx.beginPath();
-            ctx.arc(merkeZX, merkeZY, 22, 0, 2 * Math.PI);
-            ctx.fill();
+            for (let i = 0; i < 4; i++) {
+                ctx.fillStyle = renkler[i];
+                ctx.beginPath();
+                ctx.moveTo(merkeZX, merkeZY);
+                ctx.arc(merkeZX, merkeZY, yaricapDis, (i * Math.PI) / 2, ((i + 1) * Math.PI) / 2);
+                ctx.closePath();
+                ctx.fill();
+            }
 
-            // 4. İç Beyaz Zemin (Yarıçap: 18px - Renkli halkanın kalınlığı 4px kalır)
+            // 4. İç Beyaz Göbek Kısım (Yarıçap: 17px - Böylece renkli halkanın kalınlığı 6px kalır)
             ctx.fillStyle = "#ffffff";
             ctx.beginPath();
-            ctx.arc(merkeZX, merkeZY, 18, 0, 2 * Math.PI);
+            ctx.arc(merkeZX, merkeZY, 17, 0, 2 * Math.PI);
             ctx.fill();
 
-            // 5. ID Numarası (Koyu Şık Gri)
-            ctx.fillStyle = "#1e293b";
+            // 5. ID Numarasını Tam Ortaya Yaz (Siyah/Lacivert)
+            ctx.fillStyle = "#0f172a";
             ctx.font = "bold 15px 'Segoe UI', Arial, sans-serif";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
