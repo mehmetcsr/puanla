@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Kod Oluşturucu - Tasarımsal Orta ID</title>
+    <title>QR Kod Oluşturucu - Doğal Orta Rozet</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         body {
@@ -81,7 +81,7 @@
         <div id="geciciQr"></div>
 
         <div id="qrSonuc">
-            <img id="finalGorsel" src="" alt="Sık Şık Numaralı QR Kod">
+            <img id="finalGorsel" src="" alt="Pro Rozetli QR Kod">
             <a id="indirLink" download="qr.png">
                 <button class="indir-btn">QR Kodu İndir (PNG)</button>
             </a>
@@ -113,12 +113,12 @@
             setTimeout(() => {
                 const qrCanvas = geciciDiv.querySelector('canvas');
                 if (qrCanvas) {
-                    estetikLogoEkle(qrCanvas, id);
+                    dogalRozetCiz(qrCanvas, id);
                 }
             }, 100);
         }
 
-        function estetikLogoEkle(orijinalCanvas, id) {
+        function dogalRozetCiz(orijinalCanvas, id) {
             const width = orijinalCanvas.width;
             const height = orijinalCanvas.height;
 
@@ -127,48 +127,46 @@
             finalCanvas.height = height;
             const ctx = finalCanvas.getContext('2d');
 
-            // 1. Orijinal QR Kodu çiz
+            // 1. QR Kodu tabana çiz
             ctx.drawImage(orijinalCanvas, 0, 0);
 
-            // 2. Rozet (Logo) Ölçüleri
-            const kutuEn = 44;
-            const kutuBoy = 36;
-            const x = (width - kutuEn) / 2;
-            const y = (height - kutuBoy) / 2;
-            const kavis = 8;
+            // 2. Dış Beyaz Nefes Alanı (Arka plandaki karelere yapışmasını engeller)
+            const disKutuEn = 52;
+            const disKutuBoy = 42;
+            const disX = (width - disKutuEn) / 2;
+            const disY = (height - disKutuBoy) / 2;
 
-            // 3. Hafif Yumuşak Gölge Efekti
-            ctx.save();
-            ctx.shadowColor = "rgba(0, 0, 0, 0.15)";
-            ctx.shadowBlur = 6;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 2;
-
-            // Arka Plan Beyaz Rozet
             ctx.fillStyle = "#ffffff";
+            if (ctx.roundRect) {
+                ctx.beginPath();
+                ctx.roundRect(disX, disY, disKutuEn, disKutuBoy, 10);
+                ctx.fill();
+            } else {
+                ctx.fillRect(disX, disY, disKutuEn, disKutuBoy);
+            }
+
+            // 3. İç Rozet Kutusu
+            const icKutuEn = 42;
+            const icKutuBoy = 32;
+            const icX = (width - icKutuEn) / 2;
+            const icY = (height - icKutuBoy) / 2;
+
+            ctx.fillStyle = "#f8fafc";
+            ctx.strokeStyle = "#cbd5e1";
+            ctx.lineWidth = 1;
+
             ctx.beginPath();
             if (ctx.roundRect) {
-                ctx.roundRect(x, y, kutuEn, kutuBoy, kavis);
+                ctx.roundRect(icX, icY, icKutuEn, icKutuBoy, 6);
             } else {
-                ctx.fillRect(x, y, kutuEn, kutuBoy);
+                ctx.rect(icX, icY, icKutuEn, icKutuBoy);
             }
             ctx.fill();
-            ctx.restore(); // Gölge efektini kapat (yazıya yansımasın)
-
-            // 4. İnce Şık Çerçeve (Border)
-            ctx.strokeStyle = "#e2e8f0";
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            if (ctx.roundRect) {
-                ctx.roundRect(x, y, kutuEn, kutuBoy, kavis);
-            } else {
-                ctx.strokeRect(x, y, kutuEn, kutuBoy);
-            }
             ctx.stroke();
 
-            // 5. Şık Tipografi ile Numarayı Yaz
+            // 4. ID Numarası
             ctx.fillStyle = "#0f172a";
-            ctx.font = "bold 16px 'Segoe UI', system-ui, -apple-system, sans-serif";
+            ctx.font = "bold 15px 'Segoe UI', Arial, sans-serif";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillText(id, width / 2, height / 2 + 1);
