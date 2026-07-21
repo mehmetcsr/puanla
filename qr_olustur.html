@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Kod Oluşturucu - Yuvarlak Orta Rozet</title>
+    <title>QR Kod Oluşturucu - Google Renkli Rozet</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         body {
@@ -81,7 +81,7 @@
         <div id="geciciQr"></div>
 
         <div id="qrSonuc">
-            <img id="finalGorsel" src="" alt="Yuvarlak Rozetli QR Kod">
+            <img id="finalGorsel" src="" alt="Google Renkli QR Kod">
             <a id="indirLink" download="qr.png">
                 <button class="indir-btn">QR Kodu İndir (PNG)</button>
             </a>
@@ -113,12 +113,12 @@
             setTimeout(() => {
                 const qrCanvas = geciciDiv.querySelector('canvas');
                 if (qrCanvas) {
-                    yuvarlakRozetCiz(qrCanvas, id);
+                    googleRenkliRozetCiz(qrCanvas, id);
                 }
             }, 100);
         }
 
-        function yuvarlakRozetCiz(orijinalCanvas, id) {
+        function googleRenkliRozetCiz(orijinalCanvas, id) {
             const width = orijinalCanvas.width;
             const height = orijinalCanvas.height;
             const merkeZX = width / 2;
@@ -132,24 +132,33 @@
             // 1. QR Kodu tabana çiz
             ctx.drawImage(orijinalCanvas, 0, 0);
 
-            // 2. Dış Dairesel Beyaz Temizlik Alanı (Yarıçap: 25px)
+            // 2. Dış Beyaz Güvenlik Alanı (Yarıçap: 27px)
             ctx.fillStyle = "#ffffff";
             ctx.beginPath();
-            ctx.arc(merkeZX, merkeZY, 25, 0, 2 * Math.PI);
+            ctx.arc(merkeZX, merkeZY, 27, 0, 2 * Math.PI);
             ctx.fill();
 
-            // 3. İç Dairesel Şık Rozet (Yarıçap: 20px)
-            ctx.fillStyle = "#f8fafc";
-            ctx.strokeStyle = "#cbd5e1";
-            ctx.lineWidth = 1.5;
+            // 3. Google 4 Renkli Dairesel Çerçeve (Yarıçap: 22px)
+            const gradient = ctx.createConicGradient(0, merkeZX, merkeZY);
+            gradient.addColorStop(0, '#4285F4');    // Google Mavi
+            gradient.addColorStop(0.25, '#EA4335'); // Google Kırmızı
+            gradient.addColorStop(0.5, '#FBBC05');  // Google Sarı
+            gradient.addColorStop(0.75, '#34A853'); // Google Yeşil
+            gradient.addColorStop(1, '#4285F4');    // Bağlantı için tekrar Mavi
 
+            ctx.fillStyle = gradient;
             ctx.beginPath();
-            ctx.arc(merkeZX, merkeZY, 20, 0, 2 * Math.PI);
+            ctx.arc(merkeZX, merkeZY, 22, 0, 2 * Math.PI);
             ctx.fill();
-            ctx.stroke();
 
-            // 4. ID Numarasını Tam Ortaya Yaz
-            ctx.fillStyle = "#0f172a";
+            // 4. İç Beyaz Zemin (Yarıçap: 18px - Renkli halkanın kalınlığı 4px kalır)
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(merkeZX, merkeZY, 18, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 5. ID Numarası (Koyu Şık Gri)
+            ctx.fillStyle = "#1e293b";
             ctx.font = "bold 15px 'Segoe UI', Arial, sans-serif";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
