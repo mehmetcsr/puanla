@@ -3,112 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yönlendiriliyorsunuz...</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Google Yorum Yönlendirme Sistemi</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8fafc;
+            background-color: #ffffff;
+            font-family: 'Segoe UI', Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            height: 100vh;
             margin: 0;
-            color: #1e293b;
         }
-        .yukleme-kutusu {
+        .yukleniyor-kutu {
             text-align: center;
-            background: #ffffff;
-            padding: 40px 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            max-width: 320px;
-            width: 90%;
+            padding: 20px;
         }
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 20px;
+        }
+        .g-mavi { color: #4285f4; }
+        .g-kirmizi { color: #ea4335; }
+        .g-sari { color: #fabc05; }
+        .g-yesil { color: #34a853; }
+
         .spinner {
-            width: 48px;
-            height: 48px;
-            border: 5px solid #e2e8f0;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
             border-top: 5px solid #4285f4;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px auto;
+            margin: 0 auto 15px auto;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        h3 {
-            font-size: 18px;
-            margin: 0 0 8px 0;
-            color: #0f172a;
-        }
-        p {
-            font-size: 14px;
-            color: #64748b;
-            margin: 0;
+        .metin {
+            color: #475569;
+            font-size: 16px;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
-
-    <div class="yukleme-kutusu">
-        <div class="spinner" id="spinner"></div>
-        <h3 id="baslik">Yönlendiriliyorsunuz</h3>
-        <p id="metin">Lütfen birkaç saniye bekleyin...</p>
+    <div class="yukleniyor-kutu">
+        <div id="spinner" class="spinner"></div>
+        <div class="logo">
+            <span class="g-mavi">G</span><span class="g-kirmizi">o</span><span class="g-sari">o</span><span class="g-mavi">g</span><span class="g-yesil">l</span><span class="g-kirmizi">e</span>
+        </div>
+        <div id="metin" class="metin">Yorum Sayfasına Yönlendiriliyorsunuz...</div>
     </div>
-
     <script>
-        // 1. DÜKKAN LİNKLERİ LİSTEN (Eski listenin birebir aynısı)
         const dukkanLinkleri = {
-            "01": "https://www.yemeksepeti.com/restaurant/jb0z/cix-makarna?srsltid=AfmBOoocgINvqgncD-aaNtdVREfpId-ZKYxsiLhUa4eP7xt_TjyGFlUt",
-            "10": "https://www.youtube.com/watch?v=7zp1TbLFPp8"
+            "10": "https://www.youtube.com/watch?v=7zp1TbLFPp8",
+            "01": "https://www.yemeksepeti.com/restaurant/jb0z/cix-makarna?srsltid=AfmBOoocgINvqgncD-aaNtdVREfpId-ZKYxsiLhUa4eP7xt_TjyGFlUt"
             // Yeni dükkan eklemek istersen virgül koyup altına "02": "link" şeklinde ekleyebilirsin.
         };
 
-        async function yonlendir() {
+        const SAYAC_NAMESPACE = "mehmetcsr-puanla";
+
+        function yonlendir() {
             const urlParametreleri = new URLSearchParams(window.location.search);
             let kartID = urlParametreleri.get('id') || urlParametreleri.get('ID');
-
-            // Tek haneli ID geldiyse (örn: id=1) başına 0 koyarak 01 yap
             if (kartID && kartID.length === 1) {
                 kartID = "0" + kartID;
             }
-
-            // Kart ID geçerli mi ve dükkan listesinde var mı kontrol et
             if (kartID && dukkanLinkleri[kartID]) {
                 const hedefLink = dukkanLinkleri[kartID];
+                const sayacAnahtari = "kart-" + kartID;
 
-                // 2. SAYAÇ ARTTIRMA İŞLEMİ (CounterAPI)
-                // keepalive: true sayesinde sayfa değişse bile sayacı arka planda +1 arttırır
-                try {
-                    fetch(`https://api.counterapi.dev/v1/mehmetcsr-puanla/${kartID}/up`, {
-                        method: 'GET',
-                        keepalive: true
-                    }).catch(err => console.log("Sayaç servis hatası:", err));
-                } catch (e) {
-                    console.log("Sayaç tetiklenemedi:", e);
-                }
-
-                // 3. YÖNLENDİRME (300ms gecikmeyle sayacın tam tetiklenmesini garanti eder)
+                fetch(`https://abacus.jasoncameron.dev/hit/${SAYAC_NAMESPACE}/${sayacAnahtari}`)
+                    .then(() => { window.location.href = hedefLink; })
+                    .catch(() => { window.location.href = hedefLink; });
                 setTimeout(() => {
                     window.location.href = hedefLink;
-                }, 300);
+                }, 500);
 
             } else {
-                // Hata durumu (ID bulunamadıysa)
                 document.getElementById('spinner').style.display = 'none';
-                document.getElementById('baslik').innerText = "Hata Oluştu";
                 if (!kartID) {
-                    document.getElementById('metin').innerText = "Geçerli bir QR ID bulunamadı!";
+                    document.getElementById('metin').innerText = "Hata: Kart ID bulunamadı!";
                 } else {
-                    document.getElementById('metin').innerText = kartID + " ID'li dükkan sistemde tanımlı değil!";
+                    document.getElementById('metin').innerText = "Hata: " + kartID + " ID'li dükkan bulunamadı!";
                 }
             }
         }
-
-        // Sayfa yüklendiğinde yönlendirmeyi başlat
         window.onload = yonlendir;
     </script>
-
 </body>
 </html>
