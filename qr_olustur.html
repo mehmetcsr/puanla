@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masa QR Kod Oluşturucu</title>
+    <title>QR Kod Oluşturucu</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         body {
@@ -69,11 +69,11 @@
 <body>
 
     <div class="kart">
-        <h2>Masa QR Oluşturucu</h2>
+        <h2>QR Kod Oluşturucu</h2>
         
         <div class="girdi-grubu">
-            <label>Masa / Kart ID (Örn: 13, 01):</label>
-            <input type="text" id="kartId" placeholder="Örn: 13" value="13">
+            <label>Kart / QR ID:</label>
+            <input type="text" id="kartId" placeholder="Örn: 01" value="01">
         </div>
 
         <button onclick="qrOlustur()">QR Kodu Oluştur</button>
@@ -82,7 +82,7 @@
 
         <div id="qrSonuc">
             <img id="finalGorsel" src="" alt="Köşeli Numaralı QR Kod">
-            <a id="indirLink" download="masa-qr.png">
+            <a id="indirLink" download="qr.png">
                 <button class="indir-btn">QR Kodu İndir (PNG)</button>
             </a>
         </div>
@@ -92,7 +92,7 @@
         function qrOlustur() {
             let id = document.getElementById('kartId').value.trim();
             if (!id) {
-                alert("Lütfen bir Kart ID girin!");
+                alert("Lütfen bir ID girin!");
                 return;
             }
 
@@ -107,7 +107,7 @@
                 text: yonlendirmeUrl,
                 width: 300,
                 height: 300,
-                correctLevel: QRCode.CorrectLevel.H // Yüksek hata düzeltme seviyesi (Numara kaplaması için gerekli)
+                correctLevel: QRCode.CorrectLevel.H
             });
 
             setTimeout(() => {
@@ -127,22 +127,21 @@
             finalCanvas.height = height;
             const ctx = finalCanvas.getContext('2d');
 
-            // 1. Orijinal QR kodu çiz
+            // 1. QR Kodu çiz
             ctx.drawImage(orijinalCanvas, 0, 0);
 
-            // 2. Sağ alt köşedeki alan boyutları
-            const kutuEn = 55;
-            const kutuBoy = 40;
+            // 2. Sağ alt köşedeki beyaz temizlik alanı
+            const kutuEn = 50;
+            const kutuBoy = 36;
             const x = width - kutuEn;
             const y = height - kutuBoy;
 
-            // 3. Sağ alt köşeye beyaz arka plan temizliği
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(x, y, kutuEn, kutuBoy);
 
-            // 4. Numarayı tam attığın görseldeki gibi sağ alt köşeye bas
+            // 3. Sadece ID'yi (Örn: 01) basıyoruz
             ctx.fillStyle = "#000000";
-            ctx.font = "bold 32px 'Segoe UI', Arial, sans-serif";
+            ctx.font = "bold 28px 'Segoe UI', Arial, sans-serif";
             ctx.textAlign = "right";
             ctx.textBaseline = "bottom";
             ctx.fillText(id, width - 4, height - 2);
@@ -151,7 +150,7 @@
             const resimData = finalCanvas.toDataURL("image/png");
             document.getElementById('finalGorsel').src = resimData;
             document.getElementById('indirLink').href = resimData;
-            document.getElementById('indirLink').download = `Masa_QR_${id}.png`;
+            document.getElementById('indirLink').download = `QR_${id}.png`;
             document.getElementById('qrSonuc').style.display = "block";
         }
     </script>
