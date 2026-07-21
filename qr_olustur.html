@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Kod Oluşturucu</title>
+    <title>QR Kod Oluşturucu - Ortada ID</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         body {
@@ -113,12 +113,12 @@
             setTimeout(() => {
                 const qrCanvas = geciciDiv.querySelector('canvas');
                 if (qrCanvas) {
-                    ortayaZarifNumaraEkle(qrCanvas, id);
+                    TAM_ORTAYA_YAZ(qrCanvas, id);
                 }
             }, 100);
         }
 
-        function ortayaZarifNumaraEkle(orijinalCanvas, id) {
+        function TAM_ORTAYA_YAZ(orijinalCanvas, id) {
             const width = orijinalCanvas.width;
             const height = orijinalCanvas.height;
 
@@ -127,34 +127,33 @@
             finalCanvas.height = height;
             const ctx = finalCanvas.getContext('2d');
 
-            // 1. Orijinal QR Kodu çiz
+            // 1. QR Kodu çiz
             ctx.drawImage(orijinalCanvas, 0, 0);
 
-            // 2. Tam merkeze minimalist ve zarif beyaz kutu
-            const kutuEn = 36;
-            const kutuBoy = 30;
+            // 2. TAM MERKEZE BEYAZ KUTU (Köşelerde hiçbir şey yok!)
+            const kutuEn = 38;
+            const kutuBoy = 32;
             const x = (width - kutuEn) / 2;
             const y = (height - kutuBoy) / 2;
 
             ctx.fillStyle = "#ffffff";
             
-            // Yuvarlatılmış zarif çerçeve
             if (ctx.roundRect) {
                 ctx.beginPath();
-                ctx.roundRect(x, y, kutuEn, kutuBoy, 5);
+                ctx.roundRect(x, y, kutuEn, kutuBoy, 6);
                 ctx.fill();
             } else {
                 ctx.fillRect(x, y, kutuEn, kutuBoy);
             }
 
-            // 3. İnce ve şık font ile ID'yi tam merkeze yaz
+            // 3. ZARİF FONT İLE TAM ORTAYA YAZ
             ctx.fillStyle = "#0f172a";
-            ctx.font = "600 15px 'Segoe UI', Arial, sans-serif";
+            ctx.font = "bold 16px 'Segoe UI', Arial, sans-serif";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillText(id, width / 2, height / 2);
 
-            // Resim çıktısı
+            // Çıktı
             const resimData = finalCanvas.toDataURL("image/png");
             document.getElementById('finalGorsel').src = resimData;
             document.getElementById('indirLink').href = resimData;
