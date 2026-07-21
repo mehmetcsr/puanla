@@ -2,31 +2,113 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yönlendiriliyorsunuz...</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #1e293b;
+        }
+        .yukleme-kutusu {
+            text-align: center;
+            background: #ffffff;
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            max-width: 320px;
+            width: 90%;
+        }
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #e2e8f0;
+            border-top: 5px solid #4285f4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        h3 {
+            font-size: 18px;
+            margin: 0 0 8px 0;
+            color: #0f172a;
+        }
+        p {
+            font-size: 14px;
+            color: #64748b;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="yukleme-kutusu">
+        <div class="spinner" id="spinner"></div>
+        <h3 id="baslik">Yönlendiriliyorsunuz</h3>
+        <p id="metin">Lütfen birkaç saniye bekleyin...</p>
+    </div>
+
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        let kartID = urlParams.get('id') || urlParams.get('ID') || '01';
-        if (kartID.length === 1) kartID = "0" + kartID;
+        // 1. DÜKKAN LİNKLERİ LİSTEN (Eski listenin birebir aynısı)
+        const dukkanLinkleri = {
+            "01": "https://www.yemeksepeti.com/restaurant/jb0z/cix-makarna?srsltid=AfmBOoocgINvqgncD-aaNtdVREfpId-ZKYxsiLhUa4eP7xt_TjyGFlUt",
+            "10": "https://www.youtube.com/watch?v=7zp1TbLFPp8"
+            // Yeni dükkan eklemek istersen virgül koyup altına "02": "link" şeklinde ekleyebilirsin.
+        };
 
-        function yonlendir() {
-            const hedef = `index.html?id=${kartID}`;
+        async function yonlendir() {
+            const urlParametreleri = new URLSearchParams(window.location.search);
+            let kartID = urlParametreleri.get('id') || urlParametreleri.get('ID');
 
-            // Sayacı +1 artırır (Arka planda çalışır, takılmaz)
-            fetch(`https://api.counterapi.dev/v1/mehmetcsr-puanla-${kartID}/sayac/up`)
-                .finally(() => {
-                    window.location.href = hedef;
-                });
+            // Tek haneli ID geldiyse (örn: id=1) başına 0 koyarak 01 yap
+            if (kartID && kartID.length === 1) {
+                kartID = "0" + kartID;
+            }
 
-            // 300ms içinde yanıt gelmezse ne olursa olsun dükkana yönlendirir
-            setTimeout(() => {
-                window.location.href = hedef;
-            }, 300);
+            // Kart ID geçerli mi ve dükkan listesinde var mı kontrol et
+            if (kartID && dukkanLinkleri[kartID]) {
+                const hedefLink = dukkanLinkleri[kartID];
+
+                // 2. SAYAÇ ARTTIRMA İŞLEMİ (CounterAPI)
+                // keepalive: true sayesinde sayfa değişse bile sayacı arka planda +1 arttırır
+                try {
+                    fetch(`https://api.counterapi.dev/v1/mehmetcsr-puanla/${kartID}/up`, {
+                        method: 'GET',
+                        keepalive: true
+                    }).catch(err => console.log("Sayaç servis hatası:", err));
+                } catch (e) {
+                    console.log("Sayaç tetiklenemedi:", e);
+                }
+
+                // 3. YÖNLENDİRME (300ms gecikmeyle sayacın tam tetiklenmesini garanti eder)
+                setTimeout(() => {
+                    window.location.href = hedefLink;
+                }, 300);
+
+            } else {
+                // Hata durumu (ID bulunamadıysa)
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('baslik').innerText = "Hata Oluştu";
+                if (!kartID) {
+                    document.getElementById('metin').innerText = "Geçerli bir QR ID bulunamadı!";
+                } else {
+                    document.getElementById('metin').innerText = kartID + " ID'li dükkan sistemde tanımlı değil!";
+                }
+            }
         }
 
+        // Sayfa yüklendiğinde yönlendirmeyi başlat
         window.onload = yonlendir;
     </script>
-</head>
-<body style="background:#ffffff; font-family:sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; margin:0;">
-    <p style="color:#64748b; font-weight:600;">Yönlendiriliyorsunuz...</p>
+
 </body>
 </html>
