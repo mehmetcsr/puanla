@@ -4,359 +4,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Puanla! - Dükkan Tarama İstatistikleri</title>
+    <title>Puanla! - Kart İstatistiği</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', 'Segoe UI', sans-serif;
             background: #0f172a;
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: #e2e8f0;
+            padding: 20px;
         }
 
         body::before {
             content: '';
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: 
-                radial-gradient(ellipse at 20% 50%, rgba(66,133,244,0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(234,67,53,0.06) 0%, transparent 50%),
-                radial-gradient(ellipse at 60% 80%, rgba(52,168,83,0.06) 0%, transparent 50%),
-                radial-gradient(ellipse at 40% 30%, rgba(251,188,5,0.05) 0%, transparent 50%);
-            z-index: 0;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 30% 20%, rgba(66,133,244,0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(52,168,83,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(251,188,5,0.05) 0%, transparent 60%);
             pointer-events: none;
         }
 
-        .app {
+        .kart-sayfa {
             position: relative;
             z-index: 1;
-            max-width: 720px;
-            margin: 0 auto;
-            padding: 30px 20px 60px;
+            width: 100%;
+            max-width: 420px;
         }
 
-        /* ── Header ── */
-        .header {
+        /* ── Logo ── */
+        .logo {
             text-align: center;
-            margin-bottom: 35px;
+            margin-bottom: 32px;
         }
 
-        .header-logo {
-            font-size: 28px;
+        .logo-text {
+            font-size: 26px;
             font-weight: 900;
             letter-spacing: -1px;
-            margin-bottom: 6px;
         }
 
-        .header-logo .g1 { color: #4285f4; }
-        .header-logo .g2 { color: #ea4335; }
-        .header-logo .g3 { color: #fbbc05; }
-        .header-logo .g4 { color: #34a853; }
+        .logo-text .g1 { color: #4285f4; }
+        .logo-text .g2 { color: #ea4335; }
+        .logo-text .g3 { color: #fbbc05; }
+        .logo-text .g4 { color: #34a853; }
 
-        .header-sub {
-            font-size: 14px;
-            color: #64748b;
+        .logo-alt {
+            font-size: 12px;
+            color: #475569;
             font-weight: 500;
+            margin-top: 4px;
         }
 
-        .header-sub span {
-            color: #94a3b8;
-            font-weight: 600;
-        }
-
-        /* ── Özet Kartları ── */
-        .summary-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
-            margin-bottom: 28px;
-        }
-
-        .summary-card {
-            background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(30,41,59,0.6));
+        /* ── Ana Kart ── */
+        .ana-kart {
+            background: linear-gradient(145deg, rgba(30,41,59,0.95), rgba(15,23,42,0.9));
             border: 1px solid rgba(148,163,184,0.1);
-            border-radius: 16px;
-            padding: 20px;
+            border-radius: 24px;
+            padding: 36px 28px;
+            backdrop-filter: blur(20px);
             text-align: center;
-            backdrop-filter: blur(12px);
-            transition: transform 0.3s ease, border-color 0.3s ease;
-        }
-
-        .summary-card:hover {
-            transform: translateY(-3px);
-            border-color: rgba(148,163,184,0.2);
-        }
-
-        .summary-card.blue   { border-top: 3px solid #4285f4; }
-        .summary-card.green  { border-top: 3px solid #34a853; }
-        .summary-card.yellow { border-top: 3px solid #fbbc05; }
-
-        .summary-number {
-            font-size: 34px;
-            font-weight: 900;
-            letter-spacing: -1px;
-            margin-bottom: 4px;
-            background: linear-gradient(135deg, #f8fafc, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .summary-label {
-            font-size: 11px;
-            color: #64748b;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* ── Yenile Butonu ── */
-        .toolbar {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 18px;
-        }
-
-        .btn-refresh {
-            padding: 10px 20px;
-            border: 2px solid rgba(148,163,184,0.15);
-            border-radius: 12px;
-            background: rgba(30,41,59,0.8);
-            color: #94a3b8;
-            font-size: 13px;
-            font-weight: 700;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-refresh:hover {
-            border-color: rgba(148,163,184,0.3);
-            color: #e2e8f0;
-            transform: translateY(-2px);
-        }
-
-        .btn-refresh.spinning svg {
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        /* ── Dükkan Kartları ── */
-        .dukkan-listesi {
-            display: grid;
-            gap: 16px;
-        }
-
-        .dukkan-kart {
-            background: linear-gradient(135deg, rgba(30,41,59,0.95), rgba(30,41,59,0.6));
-            border: 1px solid rgba(148,163,184,0.08);
-            border-radius: 20px;
-            padding: 24px;
-            backdrop-filter: blur(12px);
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            opacity: 0;
-            transform: translateY(16px);
             position: relative;
             overflow: hidden;
         }
 
-        .dukkan-kart.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .dukkan-kart:hover {
-            border-color: rgba(148,163,184,0.2);
-            transform: translateY(-3px);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.25);
-        }
-
-        /* Sol renk şeridi */
-        .dukkan-kart::before {
+        .ana-kart::before {
             content: '';
             position: absolute;
-            left: 0; top: 0;
-            width: 4px;
-            height: 100%;
-            border-radius: 20px 0 0 20px;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4285f4, #ea4335, #fbbc05, #34a853);
         }
 
-        .dukkan-kart.c-blue::before   { background: #4285f4; }
-        .dukkan-kart.c-red::before    { background: #ea4335; }
-        .dukkan-kart.c-yellow::before { background: #fbbc05; }
-        .dukkan-kart.c-green::before  { background: #34a853; }
-
-        .dukkan-ust {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-
-        .dukkan-badge {
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
+        /* Badge */
+        .kart-badge {
+            width: 80px;
+            height: 80px;
+            border-radius: 22px;
+            margin: 0 auto 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 900;
-            font-size: 20px;
+            font-size: 28px;
             color: white;
-            flex-shrink: 0;
+            background: linear-gradient(135deg, #4285f4, #3b72db);
+            box-shadow: 0 8px 30px rgba(66,133,244,0.35);
             position: relative;
         }
 
-        .dukkan-badge::after {
+        .kart-badge::after {
             content: '';
             position: absolute;
             inset: 0;
-            border-radius: 16px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+            border-radius: 22px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
         }
 
-        .c-blue .dukkan-badge   { background: #4285f4; }
-        .c-red .dukkan-badge    { background: #ea4335; }
-        .c-yellow .dukkan-badge { background: #f59e0b; }
-        .c-green .dukkan-badge  { background: #34a853; }
-
-        .dukkan-baslik {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .dukkan-isim {
-            font-size: 17px;
+        .kart-baslik {
+            font-size: 18px;
             font-weight: 700;
             color: #f1f5f9;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
         }
 
-        .dukkan-tip {
-            font-size: 12px;
-            color: #64748b;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .dukkan-tip .dot {
-            width: 5px; height: 5px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .c-blue .dukkan-tip .dot   { background: #4285f4; }
-        .c-red .dukkan-tip .dot    { background: #ea4335; }
-        .c-yellow .dukkan-tip .dot { background: #fbbc05; }
-        .c-green .dukkan-tip .dot  { background: #34a853; }
-
-        /* Sayaç alanı */
-        .dukkan-sayac {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(15,23,42,0.5);
-            border-radius: 14px;
-            padding: 16px 20px;
-        }
-
-        .sayac-sol {
-            display: flex;
-            align-items: baseline;
-            gap: 8px;
-        }
-
-        .sayac-rakam {
-            font-size: 42px;
-            font-weight: 900;
-            letter-spacing: -2px;
-            line-height: 1;
-        }
-
-        .c-blue .sayac-rakam   { color: #4285f4; }
-        .c-red .sayac-rakam    { color: #ea4335; }
-        .c-yellow .sayac-rakam { color: #fbbc05; }
-        .c-green .sayac-rakam  { color: #34a853; }
-
-        .sayac-etiket {
+        .kart-tip {
             font-size: 13px;
             color: #64748b;
-            font-weight: 600;
-        }
-
-        .sayac-link {
-            max-width: 220px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 11px;
-            color: #475569;
-            text-align: right;
-            direction: rtl;
-        }
-
-        .sayac-link a {
-            color: #475569;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .sayac-link a:hover { color: #94a3b8; }
-
-        /* ── Yükleniyor ── */
-        .yukleniyor {
-            text-align: center;
-            padding: 60px 20px;
-            color: #475569;
-        }
-
-        .yukleniyor-spinner {
-            width: 40px; height: 40px;
-            border: 3px solid rgba(148,163,184,0.1);
-            border-top: 3px solid #4285f4;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        /* ── Boş ── */
-        .bos-durum {
-            text-align: center;
-            padding: 60px 20px;
-            color: #475569;
-            font-size: 15px;
             font-weight: 500;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
-        /* ── Footer ── */
-        .footer-info {
-            text-align: center;
-            margin-top: 30px;
-            font-size: 12px;
-            color: #475569;
-            font-weight: 500;
-        }
-
-        .footer-info .live-dot {
-            display: inline-block;
+        .kart-tip .dot {
             width: 6px; height: 6px;
             border-radius: 50%;
             background: #34a853;
-            margin-right: 6px;
-            vertical-align: middle;
             animation: pulse-dot 2s ease-in-out infinite;
         }
 
@@ -365,161 +137,261 @@
             50% { opacity: 0.3; }
         }
 
-        /* ── Responsive ── */
-        @media (max-width: 600px) {
-            .summary-row { grid-template-columns: 1fr; gap: 10px; }
-            .summary-number { font-size: 28px; }
-            .dukkan-sayac { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .sayac-link { max-width: 100%; text-align: left; direction: ltr; }
-            .sayac-rakam { font-size: 34px; }
+        /* ── Sayaç Alanı ── */
+        .sayac-alan {
+            background: rgba(15,23,42,0.6);
+            border-radius: 20px;
+            padding: 30px 20px;
+            margin-bottom: 24px;
+        }
+
+        .sayac-etiket {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+
+        .sayac-rakam {
+            font-size: 72px;
+            font-weight: 900;
+            letter-spacing: -3px;
+            line-height: 1;
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+        }
+
+        .sayac-alt {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        /* ── Link Bilgisi ── */
+        .link-bilgi {
+            background: rgba(66,133,244,0.08);
+            border: 1px solid rgba(66,133,244,0.15);
+            border-radius: 14px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .link-ikon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            background: rgba(66,133,244,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .link-detay {
+            flex: 1;
+            min-width: 0;
+            text-align: left;
+        }
+
+        .link-tip-text {
+            font-size: 13px;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        .link-url {
+            font-size: 11px;
+            color: #475569;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ── Yenile Butonu ── */
+        .yenile-btn {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid rgba(148,163,184,0.12);
+            border-radius: 14px;
+            background: rgba(30,41,59,0.6);
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .yenile-btn:hover {
+            border-color: rgba(148,163,184,0.25);
+            color: #e2e8f0;
+            transform: translateY(-2px);
+        }
+
+        .yenile-btn.spinning svg {
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* ── Son Güncelleme ── */
+        .son-guncelleme {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 11px;
+            color: #334155;
+            font-weight: 500;
+        }
+
+        /* ── Hata Durumu ── */
+        .hata-kutu {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .hata-ikon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .hata-baslik {
+            font-size: 18px;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 8px;
+        }
+
+        .hata-aciklama {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        /* ── Yükleniyor ── */
+        .yukleniyor-spinner {
+            width: 44px; height: 44px;
+            border: 3px solid rgba(148,163,184,0.1);
+            border-top: 3px solid #4285f4;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .yukleniyor-text {
+            font-size: 14px;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        /* ── Otomatik Yenileme Bar ── */
+        .oto-bar-wrap {
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .oto-bar {
+            width: 100%;
+            height: 3px;
+            border-radius: 3px;
+            background: rgba(148,163,184,0.1);
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+
+        .oto-bar-dolgu {
+            height: 100%;
+            background: linear-gradient(90deg, #4285f4, #34a853);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 1s linear;
+        }
+
+        .oto-bar-text {
+            font-size: 10px;
+            color: #334155;
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
 
-<div class="app">
-    <!-- Header -->
-    <div class="header">
-        <div class="header-logo">
+<div class="kart-sayfa">
+    <div class="logo">
+        <div class="logo-text">
             <span class="g1">P</span><span class="g2">u</span><span class="g3">a</span><span class="g4">n</span><span class="g1">l</span><span class="g2">a</span><span class="g3">!</span>
         </div>
-        <div class="header-sub">Dükkan Bazlı <span>Tarama İstatistikleri</span></div>
+        <div class="logo-alt">Kart Tarama İstatistiği</div>
     </div>
 
-    <!-- Özet -->
-    <div class="summary-row">
-        <div class="summary-card blue">
-            <div class="summary-number" id="toplamTarama">—</div>
-            <div class="summary-label">Toplam Tarama</div>
-        </div>
-        <div class="summary-card green">
-            <div class="summary-number" id="toplamDukkan">—</div>
-            <div class="summary-label">Toplam Dükkan</div>
-        </div>
-        <div class="summary-card yellow">
-            <div class="summary-number" id="enPopuler">—</div>
-            <div class="summary-label">En Çok Taranan</div>
-        </div>
-    </div>
-
-    <!-- Toolbar -->
-    <div class="toolbar">
-        <button class="btn-refresh" id="yenileBtn" onclick="verileriYukle()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
-            Yenile
-        </button>
-    </div>
-
-    <!-- Dükkan Listesi -->
-    <div class="dukkan-listesi" id="dukkanListesi">
-        <div class="yukleniyor">
+    <div class="ana-kart" id="anaKart">
+        <!-- İçerik JS ile doldurulacak -->
+        <div style="padding: 40px 0;">
             <div class="yukleniyor-spinner"></div>
-            Dükkan verileri yükleniyor...
+            <div class="yukleniyor-text">Veriler yükleniyor...</div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <div class="footer-info" id="footerInfo" style="display:none;">
-        <span class="live-dot"></span>
-        Son güncelleme: <span id="sonGuncelleme"></span>
+    <div class="son-guncelleme" id="sonGuncelleme"></div>
+
+    <!-- Otomatik yenileme barı -->
+    <div class="oto-bar-wrap" id="otoBarWrap" style="display:none;">
+        <div class="oto-bar"><div class="oto-bar-dolgu" id="otoBarDolgu"></div></div>
+        <div class="oto-bar-text">Otomatik yenileme: <span id="geriSayim">30</span>sn</div>
     </div>
 </div>
 
 <script>
-    const RENK_SINIFLAR = ['c-blue', 'c-red', 'c-yellow', 'c-green'];
     const NAMESPACE = 'mehmetcsr-puanla';
-
-    // GitHub Pages üzerindeki index.html'den dükkan linklerini çek
     const INDEX_URL = 'https://raw.githubusercontent.com/mehmetcsr/puanla/main/index.html';
+    const YENILEME_SURESI = 30; // saniye
 
-    window.addEventListener('DOMContentLoaded', verileriYukle);
+    let kartID = null;
+    let yenilemeTimer = null;
+    let geriSayimTimer = null;
 
-    async function verileriYukle() {
-        const yenileBtn = document.getElementById('yenileBtn');
-        yenileBtn.classList.add('spinning');
+    window.addEventListener('DOMContentLoaded', () => {
+        // URL'den id parametresini al
+        const params = new URLSearchParams(window.location.search);
+        kartID = params.get('id') || params.get('ID');
 
-        try {
-            // 1) index.html'den dükkan linklerini parse et
-            const dukkanlar = await dukkanlariCek();
-
-            if (dukkanlar.length === 0) {
-                document.getElementById('dukkanListesi').innerHTML =
-                    '<div class="bos-durum">Henüz kayıtlı dükkan bulunamadı.</div>';
-                yenileBtn.classList.remove('spinning');
-                return;
-            }
-
-            // 2) Her dükkan için sayaç verisini çek (paralel)
-            const sayacSonuclari = await Promise.allSettled(
-                dukkanlar.map(d => sayacGetir(d.id))
-            );
-
-            // Verileri birleştir
-            const kartVerileri = dukkanlar.map((d, i) => ({
-                id: d.id,
-                link: d.link,
-                sayi: sayacSonuclari[i].status === 'fulfilled' ? sayacSonuclari[i].value : 0
-            }));
-
-            // Büyükten küçüğe sırala
-            kartVerileri.sort((a, b) => b.sayi - a.sayi);
-
-            // 3) Özet
-            const toplam = kartVerileri.reduce((t, k) => t + k.sayi, 0);
-            const enCok = kartVerileri.length > 0 && kartVerileri[0].sayi > 0 ? kartVerileri[0] : null;
-
-            animasyonluSayi('toplamTarama', toplam);
-            animasyonluSayi('toplamDukkan', kartVerileri.length);
-            document.getElementById('enPopuler').textContent =
-                enCok ? `#${enCok.id}` : '—';
-
-            // 4) Kart listesini render et
-            renderDukkanlar(kartVerileri);
-
-            // Footer
-            document.getElementById('footerInfo').style.display = 'block';
-            document.getElementById('sonGuncelleme').textContent = new Date().toLocaleString('tr-TR');
-
-        } catch (err) {
-            console.error('Veri yükleme hatası:', err);
-            document.getElementById('dukkanListesi').innerHTML =
-                '<div class="bos-durum">Veriler yüklenirken hata oluştu. Lütfen tekrar deneyin.</div>';
+        if (kartID && kartID.length === 1) {
+            kartID = '0' + kartID;
         }
 
-        setTimeout(() => yenileBtn.classList.remove('spinning'), 400);
-    }
+        if (!kartID) {
+            hataGoster('🔍', 'Kart ID Bulunamadı', 'Bu sayfayı açmak için linkin sonunda ?id=01 gibi bir kart numarası olmalı.');
+            return;
+        }
 
-    async function dukkanlariCek() {
-        const resp = await fetch(INDEX_URL + '?t=' + Date.now(), { cache: 'no-store' });
-        const html = await resp.text();
+        veriYukle();
+    });
 
-        // "const dukkanLinkleri = { ... };" bloğunu bul ve parse et
-        const basla = html.indexOf('const dukkanLinkleri = {');
-        if (basla === -1) return [];
-
-        const bitis = html.indexOf('};', basla);
-        if (bitis === -1) return [];
-
-        // Obje kısmını çıkar
-        const objeStr = html.substring(basla + 'const dukkanLinkleri = '.length, bitis + 1);
-
-        // JSON'a çevir: tek tırnakları çift tırnak yap, trailing comma temizle
-        let jsonStr = objeStr
-            .replace(/'/g, '"')
-            .replace(/,\s*}/g, '}');
-
+    async function veriYukle() {
         try {
-            const obj = JSON.parse(jsonStr);
-            return Object.entries(obj).map(([id, link]) => ({ id, link }));
-        } catch (e) {
-            // Regex ile parse et (fallback)
-            const regex = /"(\w+)":\s*"(.*?)"/g;
-            const sonuclar = [];
-            let eslesme;
-            while ((eslesme = regex.exec(objeStr)) !== null) {
-                sonuclar.push({ id: eslesme[1], link: eslesme[2] });
-            }
-            return sonuclar;
+            // Paralel: sayaç + dükkan linki
+            const [sayi, dukkanLink] = await Promise.all([
+                sayacGetir(kartID),
+                dukkanLinkiGetir(kartID)
+            ]);
+
+            kartGoster(kartID, sayi, dukkanLink);
+            otomatikYenilemeBaslat();
+
+        } catch (err) {
+            console.error(err);
+            hataGoster('⚠️', 'Bağlantı Hatası', 'Veriler yüklenirken sorun oluştu. Sayfayı yenileyin.');
         }
     }
 
@@ -533,81 +405,137 @@
                 return data.count || 0;
             }
             return 0;
-        } catch {
-            return 0;
-        }
+        } catch { return 0; }
+    }
+
+    async function dukkanLinkiGetir(id) {
+        try {
+            const resp = await fetch(INDEX_URL + '?t=' + Date.now(), { cache: 'no-store' });
+            const html = await resp.text();
+
+            // dukkanLinkleri objesinden bu ID'nin linkini bul
+            const regex = new RegExp(`"${id}":\\s*"(.*?)"`, 'm');
+            const eslesme = html.match(regex);
+            return eslesme ? eslesme[1] : null;
+        } catch { return null; }
     }
 
     function linkTipiTespit(link) {
-        if (link.includes('google.com/local/writereview') || link.includes('google.com/maps')) {
-            return { tip: 'Google Yorum', ikon: '⭐' };
-        }
-        if (link.includes('youtube.com') || link.includes('youtu.be')) {
+        if (!link) return { tip: 'Bilinmiyor', ikon: '❓' };
+        if (link.includes('google.com/local/writereview') || link.includes('google.com/maps'))
+            return { tip: 'Google Yorum Linki', ikon: '⭐' };
+        if (link.includes('youtube.com') || link.includes('youtu.be'))
             return { tip: 'YouTube Video', ikon: '▶️' };
-        }
-        if (link.includes('instagram.com')) {
+        if (link.includes('instagram.com'))
             return { tip: 'Instagram', ikon: '📷' };
-        }
-        if (link.includes('wa.me') || link.includes('whatsapp.com')) {
+        if (link.includes('wa.me') || link.includes('whatsapp.com'))
             return { tip: 'WhatsApp', ikon: '💬' };
-        }
         return { tip: 'Web Sitesi', ikon: '🔗' };
     }
 
     function kisaltLink(link) {
+        if (!link) return '—';
         try {
             const url = new URL(link);
-            let gosterilen = url.hostname.replace('www.', '');
+            let s = url.hostname.replace('www.', '');
             if (url.pathname.length > 1) {
-                gosterilen += url.pathname.substring(0, 25);
-                if (url.pathname.length > 25) gosterilen += '…';
+                s += url.pathname.substring(0, 20);
+                if (url.pathname.length > 20) s += '…';
             }
-            return gosterilen;
-        } catch {
-            return link.substring(0, 40) + '…';
+            return s;
+        } catch { return link.substring(0, 35) + '…'; }
+    }
+
+    function kartGoster(id, sayi, dukkanLink) {
+        const { tip, ikon } = linkTipiTespit(dukkanLink);
+        const kisa = kisaltLink(dukkanLink);
+        const anaKart = document.getElementById('anaKart');
+
+        // Sayfa başlığını güncelle
+        document.title = `Kart #${id} — ${sayi} Tarama | Puanla!`;
+
+        anaKart.innerHTML = `
+            <div class="kart-badge">${id}</div>
+            <div class="kart-baslik">Kart #${id}</div>
+            <div class="kart-tip"><span class="dot"></span> Aktif</div>
+
+            <div class="sayac-alan">
+                <div class="sayac-etiket">Toplam Tarama Sayısı</div>
+                <div class="sayac-rakam" id="sayacRakam">${sayi.toLocaleString('tr-TR')}</div>
+                <div class="sayac-alt">kez okutuldu</div>
+            </div>
+
+            ${dukkanLink ? `
+            <div class="link-bilgi">
+                <div class="link-ikon">${ikon}</div>
+                <div class="link-detay">
+                    <div class="link-tip-text">${tip}</div>
+                    <div class="link-url" title="${dukkanLink}">${kisa}</div>
+                </div>
+            </div>
+            ` : ''}
+
+            <button class="yenile-btn" id="yenileBtn" onclick="manuelYenile()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+                Yenile
+            </button>
+        `;
+
+        document.getElementById('sonGuncelleme').textContent =
+            'Son güncelleme: ' + new Date().toLocaleString('tr-TR');
+    }
+
+    async function manuelYenile() {
+        const btn = document.getElementById('yenileBtn');
+        if (btn) { btn.classList.add('spinning'); }
+
+        const sayi = await sayacGetir(kartID);
+        const rakamEl = document.getElementById('sayacRakam');
+        if (rakamEl) {
+            animasyonluSayi(rakamEl, sayi);
         }
+
+        document.getElementById('sonGuncelleme').textContent =
+            'Son güncelleme: ' + new Date().toLocaleString('tr-TR');
+
+        setTimeout(() => { if (btn) btn.classList.remove('spinning'); }, 500);
+
+        // Otomatik yenilemeyi sıfırla
+        otomatikYenilemeBaslat();
     }
 
-    function renderDukkanlar(kartVerileri) {
-        const liste = document.getElementById('dukkanListesi');
-        liste.innerHTML = '';
+    function otomatikYenilemeBaslat() {
+        // Önceki timerları temizle
+        if (yenilemeTimer) clearInterval(yenilemeTimer);
+        if (geriSayimTimer) clearInterval(geriSayimTimer);
 
-        kartVerileri.forEach((kart, index) => {
-            const renkSinif = RENK_SINIFLAR[index % RENK_SINIFLAR.length];
-            const { tip, ikon } = linkTipiTespit(kart.link);
-            const kisaLink = kisaltLink(kart.link);
+        const barWrap = document.getElementById('otoBarWrap');
+        const barDolgu = document.getElementById('otoBarDolgu');
+        const geriSayimEl = document.getElementById('geriSayim');
+        barWrap.style.display = 'block';
 
-            const div = document.createElement('div');
-            div.className = `dukkan-kart ${renkSinif}`;
-            div.innerHTML = `
-                <div class="dukkan-ust">
-                    <div class="dukkan-badge">${kart.id}</div>
-                    <div class="dukkan-baslik">
-                        <div class="dukkan-isim">Kart #${kart.id} — Dükkan</div>
-                        <div class="dukkan-tip"><span class="dot"></span> ${ikon} ${tip}</div>
-                    </div>
-                </div>
-                <div class="dukkan-sayac">
-                    <div class="sayac-sol">
-                        <div class="sayac-rakam">${kart.sayi.toLocaleString('tr-TR')}</div>
-                        <div class="sayac-etiket">tarama</div>
-                    </div>
-                    <div class="sayac-link">
-                        <a href="${kart.link}" target="_blank" title="${kart.link}">${kisaLink}</a>
-                    </div>
-                </div>
-            `;
-            liste.appendChild(div);
+        let kalan = YENILEME_SURESI;
+        barDolgu.style.width = '0%';
+        geriSayimEl.textContent = kalan;
 
-            setTimeout(() => div.classList.add('show'), 100 * index);
-        });
+        geriSayimTimer = setInterval(() => {
+            kalan--;
+            geriSayimEl.textContent = kalan;
+            barDolgu.style.width = ((YENILEME_SURESI - kalan) / YENILEME_SURESI * 100) + '%';
+
+            if (kalan <= 0) {
+                clearInterval(geriSayimTimer);
+                manuelYenile();
+            }
+        }, 1000);
     }
 
-    function animasyonluSayi(elementId, hedef) {
-        const el = document.getElementById(elementId);
-        const baslangic = parseInt(el.textContent) || 0;
+    function animasyonluSayi(el, hedef) {
+        const baslangic = parseInt(el.textContent.replace(/\./g, '')) || 0;
         const fark = hedef - baslangic;
-        const sure = 800;
+        if (fark === 0) { el.textContent = hedef.toLocaleString('tr-TR'); return; }
+
+        const sure = 600;
         const t0 = performance.now();
 
         function adim(t) {
@@ -617,8 +545,17 @@
             el.textContent = Math.round(baslangic + fark * easing).toLocaleString('tr-TR');
             if (ilerleme < 1) requestAnimationFrame(adim);
         }
-
         requestAnimationFrame(adim);
+    }
+
+    function hataGoster(ikon, baslik, aciklama) {
+        document.getElementById('anaKart').innerHTML = `
+            <div class="hata-kutu">
+                <div class="hata-ikon">${ikon}</div>
+                <div class="hata-baslik">${baslik}</div>
+                <div class="hata-aciklama">${aciklama}</div>
+            </div>
+        `;
     }
 </script>
 
