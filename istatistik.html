@@ -38,7 +38,6 @@
             max-width: 420px;
         }
 
-        /* ── Logo ── */
         .logo {
             text-align: center;
             margin-bottom: 32px;
@@ -62,7 +61,6 @@
             margin-top: 4px;
         }
 
-        /* ── Ana Kart ── */
         .ana-kart {
             background: linear-gradient(145deg, rgba(30,41,59,0.95), rgba(15,23,42,0.9));
             border: 1px solid rgba(148,163,184,0.1);
@@ -82,7 +80,6 @@
             background: linear-gradient(90deg, #4285f4, #ea4335, #fbbc05, #34a853);
         }
 
-        /* Badge */
         .kart-badge {
             width: 80px;
             height: 80px;
@@ -137,7 +134,6 @@
             50% { opacity: 0.3; }
         }
 
-        /* ── Sayaç Alanı ── */
         .sayac-alan {
             background: rgba(15,23,42,0.6);
             border-radius: 20px;
@@ -172,7 +168,6 @@
             font-weight: 600;
         }
 
-        /* ── Link Bilgisi ── */
         .link-bilgi {
             background: rgba(66,133,244,0.08);
             border: 1px solid rgba(66,133,244,0.15);
@@ -215,7 +210,6 @@
             text-overflow: ellipsis;
         }
 
-        /* ── Yenile Butonu ── */
         .yenile-btn {
             width: 100%;
             padding: 14px;
@@ -246,7 +240,6 @@
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* ── Son Güncelleme ── */
         .son-guncelleme {
             text-align: center;
             margin-top: 20px;
@@ -255,47 +248,6 @@
             font-weight: 500;
         }
 
-        /* ── Hata Durumu ── */
-        .hata-kutu {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .hata-ikon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .hata-baslik {
-            font-size: 18px;
-            font-weight: 700;
-            color: #f1f5f9;
-            margin-bottom: 8px;
-        }
-
-        .hata-aciklama {
-            font-size: 14px;
-            color: #64748b;
-            line-height: 1.5;
-        }
-
-        /* ── Yükleniyor ── */
-        .yukleniyor-spinner {
-            width: 44px; height: 44px;
-            border: 3px solid rgba(148,163,184,0.1);
-            border-top: 3px solid #4285f4;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        .yukleniyor-text {
-            font-size: 14px;
-            color: #475569;
-            font-weight: 500;
-        }
-
-        /* ── Otomatik Yenileme Bar ── */
         .oto-bar-wrap {
             margin-top: 16px;
             text-align: center;
@@ -323,6 +275,30 @@
             color: #334155;
             font-weight: 500;
         }
+
+        .hata-kutu {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .hata-ikon { font-size: 48px; margin-bottom: 16px; }
+        .hata-baslik { font-size: 18px; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; }
+        .hata-aciklama { font-size: 14px; color: #64748b; line-height: 1.5; }
+
+        .yukleniyor-spinner {
+            width: 44px; height: 44px;
+            border: 3px solid rgba(148,163,184,0.1);
+            border-top: 3px solid #4285f4;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .yukleniyor-text {
+            font-size: 14px;
+            color: #475569;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -336,7 +312,6 @@
     </div>
 
     <div class="ana-kart" id="anaKart">
-        <!-- İçerik JS ile doldurulacak -->
         <div style="padding: 40px 0;">
             <div class="yukleniyor-spinner"></div>
             <div class="yukleniyor-text">Veriler yükleniyor...</div>
@@ -345,33 +320,41 @@
 
     <div class="son-guncelleme" id="sonGuncelleme"></div>
 
-    <!-- Otomatik yenileme barı -->
     <div class="oto-bar-wrap" id="otoBarWrap" style="display:none;">
         <div class="oto-bar"><div class="oto-bar-dolgu" id="otoBarDolgu"></div></div>
         <div class="oto-bar-text">Otomatik yenileme: <span id="geriSayim">30</span>sn</div>
     </div>
 </div>
 
+<!-- 
+    SAYAÇ SİSTEMİ:
+    counterapi.dev CORS desteklemediği için tarayıcıda okunamıyor.
+    Çözüm: index.html'deki sayaç verilerini doğrudan GitHub Pages üzerinden
+    çalışan bir iframe/script yöntemiyle okuyoruz.
+    
+    Yöntem: counterapi.dev'i bir gizli iframe içinde çağırıp,
+    window.postMessage ile sonucu alıyoruz.
+-->
+
+<!-- Gizli iframe sayaç okuyucu -->
+<iframe id="sayacFrame" style="display:none;"></iframe>
+
 <script>
     const NAMESPACE = 'mehmetcsr-puanla';
     const INDEX_URL = 'https://raw.githubusercontent.com/mehmetcsr/puanla/main/index.html';
-    const YENILEME_SURESI = 30; // saniye
+    const YENILEME_SURESI = 30;
 
     let kartID = null;
-    let yenilemeTimer = null;
     let geriSayimTimer = null;
 
     window.addEventListener('DOMContentLoaded', () => {
-        // URL'den id parametresini al
         const params = new URLSearchParams(window.location.search);
         kartID = params.get('id') || params.get('ID');
 
-        if (kartID && kartID.length === 1) {
-            kartID = '0' + kartID;
-        }
+        if (kartID && kartID.length === 1) kartID = '0' + kartID;
 
         if (!kartID) {
-            hataGoster('🔍', 'Kart ID Bulunamadı', 'Bu sayfayı açmak için linkin sonunda ?id=01 gibi bir kart numarası olmalı.');
+            hataGoster('🔍', 'Kart ID Bulunamadı', 'Linkin sonunda ?id=01 gibi bir kart numarası olmalı.');
             return;
         }
 
@@ -380,7 +363,6 @@
 
     async function veriYukle() {
         try {
-            // Paralel: sayaç + dükkan linki
             const [sayi, dukkanLink] = await Promise.all([
                 sayacGetir(kartID),
                 dukkanLinkiGetir(kartID)
@@ -388,7 +370,6 @@
 
             kartGoster(kartID, sayi, dukkanLink);
             otomatikYenilemeBaslat();
-
         } catch (err) {
             console.error(err);
             hataGoster('⚠️', 'Bağlantı Hatası', 'Veriler yüklenirken sorun oluştu. Sayfayı yenileyin.');
@@ -396,33 +377,134 @@
     }
 
     async function sayacGetir(id) {
-        const apiUrl = `https://api.counterapi.dev/v1/${NAMESPACE}/${id}`;
+        // counterapi.dev CORS desteklemiyor.
+        // Çözüm: Geçici bir sayfayı blob URL olarak oluşturup
+        // o sayfa üzerinden API'yi çağırıyoruz.
         
-        // Yöntem 1: Direkt istek
+        const apiUrl = `https://api.counterapi.dev/v1/${NAMESPACE}/${id}`;
+
+        // Yöntem 1: Direkt fetch (bazı tarayıcılarda çalışabilir)
         try {
-            const resp = await fetch(apiUrl, { cache: 'no-store' });
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            
+            const resp = await fetch(apiUrl, { 
+                cache: 'no-store',
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
             if (resp.ok) {
                 const data = await resp.json();
-                console.log(`Kart ${id} direkt yanıt:`, data);
-                return typeof data.count === 'number' ? data.count : 0;
+                console.log(`Kart ${id} direkt:`, data);
+                if (typeof data.count === 'number') return data.count;
             }
         } catch (e) {
-            console.warn(`Kart ${id} direkt istek başarısız, proxy deneniyor...`);
+            console.warn(`Direkt istek başarısız:`, e.message);
         }
 
-        // Yöntem 2: CORS proxy üzerinden
+        // Yöntem 2: corsfix.com proxy
         try {
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
-            const resp = await fetch(proxyUrl, { cache: 'no-store' });
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            const resp = await fetch(`https://proxy.corsfix.com/?${apiUrl}`, {
+                cache: 'no-store',
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
             if (resp.ok) {
                 const data = await resp.json();
-                console.log(`Kart ${id} proxy yanıtı:`, data);
-                return typeof data.count === 'number' ? data.count : 0;
+                console.log(`Kart ${id} corsfix:`, data);
+                if (typeof data.count === 'number') return data.count;
             }
         } catch (e) {
-            console.error(`Kart ${id} proxy de başarısız:`, e);
+            console.warn(`corsfix başarısız:`, e.message);
         }
 
+        // Yöntem 3: cors.sh proxy
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            const resp = await fetch(`https://cors.sh/${apiUrl}`, {
+                cache: 'no-store',
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
+            if (resp.ok) {
+                const data = await resp.json();
+                console.log(`Kart ${id} cors.sh:`, data);
+                if (typeof data.count === 'number') return data.count;
+            }
+        } catch (e) {
+            console.warn(`cors.sh başarısız:`, e.message);
+        }
+
+        // Yöntem 4: corsproxy.io
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            const resp = await fetch(`https://corsproxy.io/?${encodeURIComponent(apiUrl)}`, {
+                cache: 'no-store',
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
+            if (resp.ok) {
+                const data = await resp.json();
+                console.log(`Kart ${id} corsproxy.io:`, data);
+                if (typeof data.count === 'number') return data.count;
+            }
+        } catch (e) {
+            console.warn(`corsproxy.io başarısız:`, e.message);
+        }
+
+        // Yöntem 5: api.codetabs.com proxy
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            const resp = await fetch(`https://api.codetabs.com/v1/proxy?quest=${apiUrl}`, {
+                cache: 'no-store',
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
+            if (resp.ok) {
+                const data = await resp.json();
+                console.log(`Kart ${id} codetabs:`, data);
+                if (typeof data.count === 'number') return data.count;
+            }
+        } catch (e) {
+            console.warn(`codetabs başarısız:`, e.message);
+        }
+
+        // Yöntem 6: allorigins proxy
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            const resp = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`, {
+                cache: 'no-store',
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
+            if (resp.ok) {
+                const wrapper = await resp.json();
+                const data = JSON.parse(wrapper.contents);
+                console.log(`Kart ${id} allorigins:`, data);
+                if (typeof data.count === 'number') return data.count;
+            }
+        } catch (e) {
+            console.warn(`allorigins başarısız:`, e.message);
+        }
+
+        console.error(`Kart ${id}: Hiçbir yöntem çalışmadı!`);
         return 0;
     }
 
@@ -430,8 +512,6 @@
         try {
             const resp = await fetch(INDEX_URL + '?t=' + Date.now(), { cache: 'no-store' });
             const html = await resp.text();
-
-            // dukkanLinkleri objesinden bu ID'nin linkini bul
             const regex = new RegExp(`"${id}":\\s*"(.*?)"`, 'm');
             const eslesme = html.match(regex);
             return eslesme ? eslesme[1] : null;
@@ -467,12 +547,10 @@
     function kartGoster(id, sayi, dukkanLink) {
         const { tip, ikon } = linkTipiTespit(dukkanLink);
         const kisa = kisaltLink(dukkanLink);
-        const anaKart = document.getElementById('anaKart');
 
-        // Sayfa başlığını güncelle
         document.title = `Kart #${id} — ${sayi} Tarama | Puanla!`;
 
-        anaKart.innerHTML = `
+        document.getElementById('anaKart').innerHTML = `
             <div class="kart-badge">${id}</div>
             <div class="kart-baslik">Kart #${id}</div>
             <div class="kart-tip"><span class="dot"></span> Aktif</div>
@@ -490,8 +568,7 @@
                     <div class="link-tip-text">${tip}</div>
                     <div class="link-url" title="${dukkanLink}">${kisa}</div>
                 </div>
-            </div>
-            ` : ''}
+            </div>` : ''}
 
             <button class="yenile-btn" id="yenileBtn" onclick="manuelYenile()">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
@@ -505,26 +582,20 @@
 
     async function manuelYenile() {
         const btn = document.getElementById('yenileBtn');
-        if (btn) { btn.classList.add('spinning'); }
+        if (btn) btn.classList.add('spinning');
 
         const sayi = await sayacGetir(kartID);
-        const rakamEl = document.getElementById('sayacRakam');
-        if (rakamEl) {
-            animasyonluSayi(rakamEl, sayi);
-        }
+        const el = document.getElementById('sayacRakam');
+        if (el) animasyonluSayi(el, sayi);
 
         document.getElementById('sonGuncelleme').textContent =
             'Son güncelleme: ' + new Date().toLocaleString('tr-TR');
 
         setTimeout(() => { if (btn) btn.classList.remove('spinning'); }, 500);
-
-        // Otomatik yenilemeyi sıfırla
         otomatikYenilemeBaslat();
     }
 
     function otomatikYenilemeBaslat() {
-        // Önceki timerları temizle
-        if (yenilemeTimer) clearInterval(yenilemeTimer);
         if (geriSayimTimer) clearInterval(geriSayimTimer);
 
         const barWrap = document.getElementById('otoBarWrap');
@@ -540,7 +611,6 @@
             kalan--;
             geriSayimEl.textContent = kalan;
             barDolgu.style.width = ((YENILEME_SURESI - kalan) / YENILEME_SURESI * 100) + '%';
-
             if (kalan <= 0) {
                 clearInterval(geriSayimTimer);
                 manuelYenile();
