@@ -396,22 +396,34 @@
     }
 
     async function sayacGetir(id) {
+        const apiUrl = `https://api.counterapi.dev/v1/${NAMESPACE}/${id}`;
+        
+        // Yöntem 1: Direkt istek
         try {
-            const resp = await fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/${id}`, {
-                cache: 'no-store',
-                mode: 'cors'
-            });
+            const resp = await fetch(apiUrl, { cache: 'no-store' });
             if (resp.ok) {
                 const data = await resp.json();
-                console.log(`Kart ${id} API yanıtı:`, data);
+                console.log(`Kart ${id} direkt yanıt:`, data);
                 return typeof data.count === 'number' ? data.count : 0;
             }
-            console.warn(`Kart ${id} API hata kodu:`, resp.status);
-            return 0;
-        } catch (err) {
-            console.error(`Kart ${id} sayaç hatası:`, err);
-            return 0;
+        } catch (e) {
+            console.warn(`Kart ${id} direkt istek başarısız, proxy deneniyor...`);
         }
+
+        // Yöntem 2: CORS proxy üzerinden
+        try {
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+            const resp = await fetch(proxyUrl, { cache: 'no-store' });
+            if (resp.ok) {
+                const data = await resp.json();
+                console.log(`Kart ${id} proxy yanıtı:`, data);
+                return typeof data.count === 'number' ? data.count : 0;
+            }
+        } catch (e) {
+            console.error(`Kart ${id} proxy de başarısız:`, e);
+        }
+
+        return 0;
     }
 
     async function dukkanLinkiGetir(id) {
