@@ -86,6 +86,24 @@
                 <button class="indir-btn">QR Kodu İndir (PNG)</button>
             </a>
         </div>
+
+        <hr style="margin:28px 0; border:none; border-top:1px solid #e2e8f0;">
+
+        <h2 style="font-size:18px; margin-bottom:15px;">Toplu QR İndir</h2>
+
+        <div class="girdi-grubu">
+            <label>Başlangıç ID:</label>
+            <input type="number" id="topluBas" placeholder="Örn: 21" value="21" min="1">
+        </div>
+
+        <div class="girdi-grubu">
+            <label>Bitiş ID:</label>
+            <input type="number" id="topluBit" placeholder="Örn: 121" value="121" min="1">
+        </div>
+
+        <button class="indir-btn" id="topluBtn" onclick="topluIndir()">Aralığı Toplu İndir (PNG)</button>
+
+        <div id="topluDurum" style="margin-top:12px; font-size:13px; color:#64748b; text-align:center;"></div>
     </div>
 
     <script>
@@ -118,7 +136,8 @@
             }, 100);
         }
 
-        function canliGoogleRozetCiz(orijinalCanvas, id) {
+        // Canlı Google rozetini çizip PNG data URL'i döndürür (ortak mantık)
+        function rozetliQrData(orijinalCanvas, id) {
             const width = orijinalCanvas.width;
             const height = orijinalCanvas.height;
             const merkeZX = width / 2;
@@ -140,7 +159,7 @@
 
             // 3. Canlı Google Renk Dilimleri (Yarıçap: 25px)
             // Tam Google Hex Kodları: Mavi, Kırmızı, Sarı, Yeşil
-            const canliRenkler = ['#4285F4', '#EA4335', '#FBBC05', '#34A853']; 
+            const canliRenkler = ['#4285F4', '#EA4335', '#FBBC05', '#34A853'];
             const yaricapDis = 25;
 
             for (let i = 0; i < 4; i++) {
@@ -165,12 +184,95 @@
             ctx.textBaseline = "middle";
             ctx.fillText(id, merkeZX, merkeZY + 1);
 
-            // Çıktı
-            const resimData = finalCanvas.toDataURL("image/png");
+            return finalCanvas.toDataURL("image/png");
+        }
+
+        function canliGoogleRozetCiz(orijinalCanvas, id) {
+            const resimData = rozetliQrData(orijinalCanvas, id);
             document.getElementById('finalGorsel').src = resimData;
             document.getElementById('indirLink').href = resimData;
             document.getElementById('indirLink').download = `QR_${id}.png`;
             document.getElementById('qrSonuc').style.display = "block";
+        }
+
+        // ID biçimlendirme: tek haneli sayının başına 0 ekler (mevcut mantıkla aynı)
+        function idFormatla(n) {
+            let id = String(n);
+            if (id.length === 1) id = "0" + id;
+            return id;
+        }
+
+        // Tek bir ID için gizli QR üretip PNG data URL'i döndürür (Promise)
+        function qrPngUret(id) {
+            return new Promise((resolve) => {
+                const yonlendirmeUrl = `https://mehmetcsr.github.io/puanla/git.html?id=${id}`;
+                const geciciDiv = document.createElement('div');
+                geciciDiv.style.display = 'none';
+                document.body.appendChild(geciciDiv);
+
+                new QRCode(geciciDiv, {
+                    text: yonlendirmeUrl,
+                    width: 320,
+                    height: 320,
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+                setTimeout(() => {
+                    const qrCanvas = geciciDiv.querySelector('canvas');
+                    let resimData = null;
+                    if (qrCanvas) {
+                        resimData = rozetliQrData(qrCanvas, id);
+                    }
+                    document.body.removeChild(geciciDiv);
+                    resolve(resimData);
+                }, 120);
+            });
+        }
+
+        // Girilen aralıktaki tüm QR'ları tek tek indirir
+        async function topluIndir() {
+            const bas = parseInt(document.getElementById('topluBas').value, 10);
+            const bit = parseInt(document.getElementById('topluBit').value, 10);
+            const durum = document.getElementById('topluDurum');
+            const btn = document.getElementById('topluBtn');
+
+            if (isNaN(bas) || isNaN(bit)) {
+                alert("Lütfen başlangıç ve bitiş ID girin!");
+                return;
+            }
+            if (bas > bit) {
+                alert("Başlangıç ID, bitiş ID'den büyük olamaz!");
+                return;
+            }
+
+            const toplam = bit - bas + 1;
+            btn.disabled = true;
+            btn.style.opacity = "0.6";
+            btn.style.cursor = "not-allowed";
+
+            let sayac = 0;
+            for (let n = bas; n <= bit; n++) {
+                const id = idFormatla(n);
+                const dataUrl = await qrPngUret(id);
+
+                if (dataUrl) {
+                    const a = document.createElement('a');
+                    a.href = dataUrl;
+                    a.download = `QR_${id}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+
+                sayac++;
+                durum.textContent = `İndiriliyor... ${sayac}/${toplam}  (QR_${id}.png)`;
+                await new Promise((r) => setTimeout(r, 300));
+            }
+
+            durum.textContent = `✅ Tamamlandı! ${toplam} adet QR indirildi.`;
+            btn.disabled = false;
+            btn.style.opacity = "1";
+            btn.style.cursor = "pointer";
         }
     </script>
 
